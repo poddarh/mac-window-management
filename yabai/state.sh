@@ -7,6 +7,7 @@ PATH=/opt/homebrew/bin:$PATH
 
 STATE_DIR="$HOME/.yabai"
 STATE_FILE="$STATE_DIR/state.json"
+LOCK_FILE="$STATE_DIR/.state.lock"
 
 # Default state structure
 DEFAULT_STATE='{
@@ -18,6 +19,27 @@ DEFAULT_STATE='{
     "mode": "default"
   }
 }'
+
+# Acquire lock (with timeout)
+acquire_lock() {
+    local timeout=5
+    local count=0
+    while ! mkdir "$LOCK_FILE" 2>/dev/null; do
+        sleep 0.1
+        count=$((count + 1))
+        if [[ $count -gt $((timeout * 10)) ]]; then
+            # Force remove stale lock
+            rm -rf "$LOCK_FILE"
+            mkdir "$LOCK_FILE" 2>/dev/null || true
+            break
+        fi
+    done
+}
+
+# Release lock
+release_lock() {
+    rm -rf "$LOCK_FILE"
+}
 
 # Ensure state directory and file exist with defaults
 init() {
@@ -42,8 +64,15 @@ init() {
 get() {
     local path="$1"
 
+    # Only initialize if file doesn't exist at all
     if [[ ! -f "$STATE_FILE" ]]; then
         init
+    fi
+
+    # If file is empty or invalid, return null rather than reinitializing
+    if [[ ! -s "$STATE_FILE" ]] || ! jq -e . "$STATE_FILE" >/dev/null 2>&1; then
+        echo "null"
+        return 1
     fi
 
     # Convert dot notation to jq path
@@ -58,8 +87,18 @@ set() {
     local path="$1"
     local value="$2"
 
+    acquire_lock
+
+    # Only initialize if file doesn't exist at all
     if [[ ! -f "$STATE_FILE" ]]; then
         init
+    fi
+
+    # If file is empty or invalid, cannot set - release lock and fail
+    if [[ ! -s "$STATE_FILE" ]] || ! jq -e . "$STATE_FILE" >/dev/null 2>&1; then
+        release_lock
+        echo "Error: state file is corrupted" >&2
+        return 1
     fi
 
     # Convert dot notation to jq path
@@ -73,6 +112,8 @@ set() {
         # Value is a string, quote it
         jq "$jq_path = \"$value\"" "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
     fi
+
+    release_lock
 }
 
 # Main command dispatcher

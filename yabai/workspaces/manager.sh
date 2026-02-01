@@ -92,15 +92,27 @@ switch() {
         return
     fi
 
-    # If on a shared space but switching to different profile, focus the equivalent space
+    # If on a shared space but switching to different profile, go to the target workspace's last space
     if [[ "$on_shared_space" == true && "$current_profile" != "$target_profile" ]]; then
-        local target_shared_space="${target_profile}_${shared_space_num}"
-        if [[ "$shared_space_num" != "10" ]]; then
-            target_shared_space="${target_profile}_0${shared_space_num}"
+        # Get last active space for target workspace (default to 1)
+        local target_space_num
+        target_space_num=$("$STATE_CMD" get "workspace.lastSpace.${name}" 2>/dev/null)
+        if [[ -z "$target_space_num" || "$target_space_num" == "null" ]]; then
+            target_space_num="1"
         fi
-        # Create the space if it doesn't exist
-        "$YABAI_DIR/spaces/create.sh" "$shared_space_num" "$name"
-        yabai -m space --focus "$target_shared_space" 2>/dev/null || true
+
+        local target_space="${name}_0${target_space_num}"
+        # Check if target space exists, if so focus it
+        if yabai -m query --spaces | jq -e --arg label "$target_space" '.[] | select(.label == $label)' >/dev/null 2>&1; then
+            yabai -m space --focus "$target_space"
+        else
+            # Try to focus first available space in the new workspace
+            local first_space
+            first_space=$(yabai -m query --spaces | jq -r --arg prefix "${name}_" '[.[] | select(.label | startswith($prefix))] | sort_by(.label) | .[0].label // empty')
+            if [[ -n "$first_space" ]]; then
+                yabai -m space --focus "$first_space"
+            fi
+        fi
         "$REFRESH_BAR"
         return
     fi

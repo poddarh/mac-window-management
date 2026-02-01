@@ -43,7 +43,5 @@ yabai -m space --focus "$new_label"
 # Update active workspace
 "$YABAI_DIR/state.sh" set 'workspace.active' "$target_workspace"
 
-osascript -e "display notification \"Space moved to $target_workspace\" with title \"✓ Space Moved\""
-
 # Refresh bar
 "$YABAI_DIR/lib/refresh_bar.sh"

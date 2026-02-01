@@ -43,7 +43,5 @@ yabai -m window --focus "$window_id"
 # Update active workspace
 "$YABAI_DIR/state.sh" set 'workspace.active' "$target_workspace"
 
-osascript -e "display notification \"Window moved to $target_workspace\" with title \"✓ Window Moved\""
-
 # Refresh bar
 "$YABAI_DIR/lib/refresh_bar.sh"

@@ -55,6 +55,18 @@ yabai -m signal --add event=space_changed \
 yabai -m signal --add event=space_changed \
     action="~/.yabai/workspaces/sync.sh"
 
-yabai -m signal --add event=window_focused action="~/.yabai/lib/refresh_bar.sh status"
+# Refresh bar when window focus changes (e.g., clicking notifications)
+yabai -m signal --add event=window_focused \
+    action="~/.yabai/workspaces/sync.sh && ~/.yabai/lib/refresh_bar.sh spaces workspace status"
+
+# Refresh bar when application switches (covers notification clicks)
+yabai -m signal --add event=application_front_switched \
+    action="~/.yabai/workspaces/sync.sh && ~/.yabai/lib/refresh_bar.sh spaces workspace"
+
+# Refresh bar when window is created or shown
+yabai -m signal --add event=window_created \
+    action="~/.yabai/lib/refresh_bar.sh spaces workspace"
+yabai -m signal --add event=window_deminimized \
+    action="~/.yabai/workspaces/sync.sh && ~/.yabai/lib/refresh_bar.sh spaces workspace"
 
 echo "yabai configuration loaded.."
