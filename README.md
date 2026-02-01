@@ -169,3 +169,20 @@ Workspace state is stored in `~/.yabai/state.json`:
 - [Karabiner-Elements](https://karabiner-elements.pqrs.org/) - Keyboard customization
 - [Finicky](https://github.com/johnste/finicky) - URL routing
 - [jq](https://stedolan.github.io/jq/) - JSON processing
+
+## WiFi SSID Display (macOS Sonoma+)
+
+macOS Sonoma restricts access to WiFi network names for privacy. To display the WiFi SSID in the status bar, create a Shortcut:
+
+1. Open **Shortcuts** app
+2. Create a new shortcut named exactly: `GetWiFiSSID`
+3. Add action: **Get Current Wi-Fi**
+4. Add action: **Stop and Output** (set to output the Wi-Fi name)
+5. Save the shortcut
+
+Test it works:
+```bash
+shortcuts run "GetWiFiSSID"
+```
+
+If the shortcut doesn't exist, the status bar will show just a WiFi icon without the network name.
