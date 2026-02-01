@@ -1,0 +1,3 @@
+[submodule "stackline"]
+	path = stackline
+	url = https://github.com/poddarh/stackline.git
