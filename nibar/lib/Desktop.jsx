@@ -157,7 +157,7 @@ const render = ({ output, displays, activeWorkspace, profileType }) => {
       key="workspace-label"
       style={{...workspaceLabelStyle, color: profileColor}}
       onClick={() => {
-        Uebersicht.run(`$HOME/.yabai/workspaces.sh cycle`);
+        Uebersicht.run(`$HOME/.yabai/workspaces/manager.sh cycle`);
       }}
       title="Click to cycle workspaces"
     >

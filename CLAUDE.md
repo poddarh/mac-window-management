@@ -7,5 +7,5 @@
 
 ## Yabai Management
 
-- **Always use `~/.yabai/reload_yabai.sh` to restart yabai.** This script saves and restores window state so windows, spaces, and workspaces are preserved across restarts.
+- **Always use `~/.yabai/reload.sh` to restart yabai.** This script saves and restores window state so windows, spaces, and workspaces are preserved across restarts.
 - Never use `yabai --restart-service` directly as it will lose window positions and workspace state.
