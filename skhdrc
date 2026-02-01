@@ -211,7 +211,6 @@ cmd + ctrl + alt - x : open ~
 
 :: default : ~/.yabai/state.sh set skhd.mode default && ~/.yabai/notify_bar_status.sh
 :: resize  : ~/.yabai/state.sh set skhd.mode resize && ~/.yabai/notify_bar_status.sh
-:: movewin @ : ~/.yabai/state.sh set skhd.mode movewin && ~/.yabai/notify_bar_status.sh
 
 default  <  cmd + ctrl + alt - r         ; resize
 resize   <  escape         ; default
@@ -230,19 +229,11 @@ resize   <  shift - right  : yabai -m window --resize right:20:0 ; yabai -m wind
 # Workspace navigation
 cmd + ctrl + alt - w : ~/.yabai/workspaces.sh cycle
 
-# Move window to another workspace (modal mode)
-# Press cmd+ctrl+alt+shift+w to enter mode, then 1-9 to select target workspace
-default  <  shift + cmd + ctrl + alt - w ; movewin
-movewin  <  escape         ; default
-movewin  <  1              : ~/.yabai/move_to_workspace.sh 1 ; skhd -k "escape"
-movewin  <  2              : ~/.yabai/move_to_workspace.sh 2 ; skhd -k "escape"
-movewin  <  3              : ~/.yabai/move_to_workspace.sh 3 ; skhd -k "escape"
-movewin  <  4              : ~/.yabai/move_to_workspace.sh 4 ; skhd -k "escape"
-movewin  <  5              : ~/.yabai/move_to_workspace.sh 5 ; skhd -k "escape"
-movewin  <  6              : ~/.yabai/move_to_workspace.sh 6 ; skhd -k "escape"
-movewin  <  7              : ~/.yabai/move_to_workspace.sh 7 ; skhd -k "escape"
-movewin  <  8              : ~/.yabai/move_to_workspace.sh 8 ; skhd -k "escape"
-movewin  <  9              : ~/.yabai/move_to_workspace.sh 9 ; skhd -k "escape"
+# Move window to another workspace (dialog)
+shift + cmd + ctrl + alt - w : ~/.yabai/move_to_workspace_dialog.sh
+
+# Move space to another workspace (dialog)
+shift + cmd + ctrl + alt - m : ~/.yabai/move_space_dialog.sh
 
 #######################
 #### Sample Config ####
