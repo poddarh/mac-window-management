@@ -55,10 +55,21 @@ switch() {
     local current_space
     current_space=$(yabai -m query --spaces | jq -r '.[] | select(."has-focus") | .label')
 
-    # Check if we're on a shared space (space_07 through space_10)
+    # Get profile types for current and target workspaces
+    local current_profile
+    current_profile=$(profile "$current_active")
+    local target_profile
+    target_profile=$(profile "$name")
+
+    # Check if we're on a profile-shared space (7-10)
     local on_shared_space=false
-    if [[ "$current_space" =~ ^space_0[7-9]$ ]] || [[ "$current_space" == "space_10" ]]; then
+    local shared_space_num=""
+    if [[ "$current_space" =~ ^(work|personal)_0([7-9])$ ]]; then
         on_shared_space=true
+        shared_space_num="${current_space: -1}"
+    elif [[ "$current_space" =~ ^(work|personal)_10$ ]]; then
+        on_shared_space=true
+        shared_space_num="10"
     fi
 
     # Save current space number for the current workspace (if on a workspace-specific space)
@@ -73,8 +84,22 @@ switch() {
     # Update active workspace
     "$STATE_CMD" set 'workspace.active' "$name"
 
-    # If on a shared space, just update state and refresh bar - no focus change needed
-    if [[ "$on_shared_space" == true ]]; then
+    # If on a shared space and staying on same profile type, just update state
+    if [[ "$on_shared_space" == true && "$current_profile" == "$target_profile" ]]; then
+        osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
+        osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+        return
+    fi
+
+    # If on a shared space but switching to different profile, focus the equivalent space
+    if [[ "$on_shared_space" == true && "$current_profile" != "$target_profile" ]]; then
+        local target_shared_space="${target_profile}_${shared_space_num}"
+        if [[ "$shared_space_num" != "10" ]]; then
+            target_shared_space="${target_profile}_0${shared_space_num}"
+        fi
+        # Create the space if it doesn't exist
+        "$SCRIPT_DIR/create_space.sh" "$shared_space_num" "$name"
+        yabai -m space --focus "$target_shared_space" 2>/dev/null || true
         osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
         osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
         return
@@ -116,18 +141,26 @@ switch() {
 }
 
 # Create a new workspace
-# Usage: workspaces.sh create <name>
+# Usage: workspaces.sh create <name> [profile]
+# profile: "work" or "personal" (default: personal)
 create() {
     local name="$1"
+    local profile="${2:-personal}"
 
     if [[ -z "$name" ]]; then
-        echo "Usage: workspaces.sh create <name>"
+        echo "Usage: workspaces.sh create <name> [work|personal]"
         exit 1
     fi
 
     # Validate name (alphanumeric and underscore only)
     if ! [[ "$name" =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]]; then
         echo "Invalid workspace name. Use alphanumeric characters and underscores, starting with a letter."
+        exit 1
+    fi
+
+    # Validate profile
+    if [[ "$profile" != "work" && "$profile" != "personal" ]]; then
+        echo "Invalid profile type. Use 'work' or 'personal'."
         exit 1
     fi
 
@@ -144,6 +177,9 @@ create() {
     new_list=$(echo "$workspaces" | jq --arg name "$name" '. + [$name]')
     "$STATE_CMD" set 'workspace.list' "$new_list"
 
+    # Store the profile type for this workspace
+    "$STATE_CMD" set "workspace.profiles.${name}" "$profile"
+
     # Create the 6 spaces for this workspace
     for i in 01 02 03 04 05 06; do
         "$SCRIPT_DIR/create_space.sh" "$i" "$name"
@@ -159,7 +195,7 @@ create() {
     osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
     osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
 
-    echo "Created workspace '$name'"
+    echo "Created workspace '$name' with profile '$profile'"
 }
 
 # Delete a workspace
@@ -321,6 +357,22 @@ cycle() {
     fi
 }
 
+# Get profile type for a workspace (or current workspace if none specified)
+# Usage: workspaces.sh profile [name]
+# Returns: "work" or "personal"
+profile() {
+    local name="${1:-$(active)}"
+    local profile
+    profile=$("$STATE_CMD" get "workspace.profiles.${name}" 2>/dev/null)
+
+    if [[ -z "$profile" || "$profile" == "null" ]]; then
+        # Default to personal for unknown workspaces
+        echo "personal"
+    else
+        echo "$profile"
+    fi
+}
+
 # Main command dispatcher
 case "$1" in
     list)
@@ -329,11 +381,14 @@ case "$1" in
     active)
         active
         ;;
+    profile)
+        profile "$2"
+        ;;
     switch)
         switch "$2"
         ;;
     create)
-        create "$2"
+        create "$2" "$3"
         ;;
     delete)
         delete "$2"
@@ -345,14 +400,15 @@ case "$1" in
         cycle
         ;;
     *)
-        echo "Usage: $0 {list|active|switch|create|delete|rename|cycle} [args...]"
-        echo "  list           - List all workspaces"
-        echo "  active         - Get active workspace name"
-        echo "  switch <name>  - Switch to a workspace"
-        echo "  create <name>  - Create a new workspace"
-        echo "  delete <name>  - Delete a workspace"
+        echo "Usage: $0 {list|active|profile|switch|create|delete|rename|cycle} [args...]"
+        echo "  list              - List all workspaces"
+        echo "  active            - Get active workspace name"
+        echo "  profile [name]    - Get profile type (work/personal) for workspace"
+        echo "  switch <name>     - Switch to a workspace"
+        echo "  create <name> [profile] - Create a new workspace (profile: work|personal)"
+        echo "  delete <name>     - Delete a workspace"
         echo "  rename <old> <new> - Rename a workspace"
-        echo "  cycle          - Cycle to next workspace"
+        echo "  cycle             - Cycle to next workspace"
         exit 1
         ;;
 esac

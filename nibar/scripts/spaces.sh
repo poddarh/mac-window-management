@@ -3,6 +3,7 @@
 PATH=/opt/homebrew/bin/:$PATH
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 YABAI_DIR="$HOME/.yabai"
+WORKSPACES_CMD="$HOME/.yabai/workspaces.sh"
 
 # Check if yabai exists
 if ! [ -x "$(command -v yabai)" ]; then
@@ -29,6 +30,12 @@ else
   fi
 fi
 
+# Get profile type for active workspace
+PROFILE_TYPE="personal"
+if [ -x "$WORKSPACES_CMD" ]; then
+  PROFILE_TYPE=$("$WORKSPACES_CMD" profile "$ACTIVE_WORKSPACE" 2>/dev/null || echo "personal")
+fi
+
 # Get workspace list
 WORKSPACE_LIST='["default"]'
 if [ -f "$YABAI_DIR/state.json" ]; then
@@ -40,6 +47,7 @@ echo $(cat <<-EOF
   "spaces": $SPACES,
   "displays": $DISPLAYS,
   "activeWorkspace": "$ACTIVE_WORKSPACE",
+  "profileType": "$PROFILE_TYPE",
   "workspaces": $WORKSPACE_LIST
 }
 EOF

@@ -10,7 +10,7 @@ die () {
 # Validate arguments
 # Usage: create_space.sh <index> [workspace_name]
 # - For spaces 01-06: if workspace_name provided, creates "{workspace}_XX", else uses active workspace
-# - For spaces 07-10: always creates "space_XX" (shared)
+# - For spaces 07-10: creates "{profile}_XX" where profile is work/personal based on workspace
 
 [ "$#" -ge 1 ] || die "At least 1 argument required, $# provided"
 echo $1 | grep -E -q '^(0[1-9]|10)$' || die "Numeric argument required in the range [01, 10], $1 provided"
@@ -32,8 +32,14 @@ if [[ "$index" =~ ^0[1-6]$ ]]; then
     fi
     label="${workspace_prefix}_${index}"
 else
-    # Shared space (7-10)
-    label="space_${index}"
+    # Profile-shared space (7-10) - shared across workspaces of the same profile type
+    # Get the profile type for the current/specified workspace
+    if [[ -n "$workspace_prefix" ]]; then
+        profile_type=$("$SCRIPT_DIR/workspaces.sh" profile "$workspace_prefix" 2>/dev/null || echo "personal")
+    else
+        profile_type=$("$SCRIPT_DIR/workspaces.sh" profile 2>/dev/null || echo "personal")
+    fi
+    label="${profile_type}_${index}"
 fi
 
 # If a space with that label already exists, then return
@@ -62,9 +68,9 @@ if [[ "$index" =~ ^0[1-6]$ ]]; then
       | map(select(.label > $label))[0].index // $fallback
     ')"
 else
-    # Shared space: use original logic for space_XX pattern
-    insertion_index="$(yabai -m query --spaces --display $current_display | jq --arg index "$index" --argjson fallback "$new_index" '
-      [.[] | select(.label | test("^space_[0-9]+$")) | {index: .index, num: (.label | ltrimstr("space_") | tonumber)}]
+    # Profile-shared space: use profile_XX pattern (e.g., work_07, personal_08)
+    insertion_index="$(yabai -m query --spaces --display $current_display | jq --arg profile "$profile_type" --arg index "$index" --argjson fallback "$new_index" '
+      [.[] | select(.label | test("^" + $profile + "_[0-9]+$")) | {index: .index, num: (.label | split("_")[-1] | tonumber)}]
       | map(select(.num > ($index | tonumber)))[0].index // $fallback
     ')"
 fi

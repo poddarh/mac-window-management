@@ -5,7 +5,9 @@ export default {
     bg: "#1c1c1c",
     red: "#ff8700",
     accent: "#5fafaf",
-    empty: "red"
+    empty: "red",
+    work: "#87afff",      // Blue for work profile
+    personal: "#87d787"   // Green for personal profile
   },
   fontSize: "18px",
   lineHeight: "24px",

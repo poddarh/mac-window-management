@@ -3,7 +3,7 @@
 # Focus a space with workspace awareness
 # Usage: focus_space.sh <space_number>
 # For spaces 1-6: focuses {active_workspace}_0N
-# For spaces 7-10: focuses space_0N or space_10
+# For spaces 7-10: focuses {profile}_0N where profile is work/personal
 
 PATH=/opt/homebrew/bin:$PATH
 
@@ -25,8 +25,9 @@ if [[ "$space_num" =~ ^0[1-6]$ ]]; then
     fi
     label="${workspace}_${space_num}"
 else
-    # Shared space (7-10)
-    label="space_${space_num}"
+    # Profile-shared space (7-10)
+    profile_type=$("$SCRIPT_DIR/workspaces.sh" profile 2>/dev/null || echo "personal")
+    label="${profile_type}_${space_num}"
 fi
 
 # Ensure space exists

@@ -2,6 +2,7 @@
 
 PATH=/opt/homebrew/bin/:$PATH
 YABAI_DIR="$HOME/.yabai"
+WORKSPACES_CMD="$HOME/.yabai/workspaces.sh"
 
 # Get focused space label
 FOCUSED_SPACE=$(yabai -m query --spaces 2>/dev/null | jq -r '.[] | select(."has-focus") | .label')
@@ -25,10 +26,17 @@ if [ -f "$YABAI_DIR/state.json" ]; then
   WORKSPACE_LIST=$(cat "$YABAI_DIR/state.json" | jq '.workspace.list // ["default"]')
 fi
 
+# Get workspace profiles
+WORKSPACE_PROFILES='{}'
+if [ -f "$YABAI_DIR/state.json" ]; then
+  WORKSPACE_PROFILES=$(cat "$YABAI_DIR/state.json" | jq '.workspace.profiles // {}')
+fi
+
 echo $(cat <<-EOF
 {
   "activeWorkspace": "$ACTIVE_WORKSPACE",
-  "workspaces": $WORKSPACE_LIST
+  "workspaces": $WORKSPACE_LIST,
+  "workspaceProfiles": $WORKSPACE_PROFILES
 }
 EOF
 )
