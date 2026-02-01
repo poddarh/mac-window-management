@@ -20,8 +20,8 @@ fi
 # Get the current display
 current_display="$(yabai -m query --spaces | jq 'map(select(."has-focus"))[0].display')"
 
-# Create a new space on the current display
-yabai -m space --create --display $current_display
+# Create a new space (creates on the currently focused display)
+yabai -m space --create
 
 # Get the index for the newly created space (it's the last space on this display)
 new_index="$(yabai -m query --spaces --display $current_display | jq '.[-1].index')"
