@@ -79,8 +79,8 @@
 # close window
 shift + cmd + ctrl + alt - q : yabai -m window --close
 
-# restart yabai2
-shift + cmd + ctrl + alt - r : yabai --restart-service
+# restart yabai (with state preservation)
+shift + cmd + ctrl + alt - r : ~/.yabai/reload_yabai.sh
 
 # focus windows
 cmd + ctrl + alt - left : yabai -m window --focus west
@@ -128,35 +128,35 @@ cmd + ctrl + alt - n : yabai -m space --focus next
 # Create space on the active display
 cmd + ctrl + alt - p : yabai -m space --focus prev
 
-# Move window across spaces
-cmd + ctrl + alt - 1 : ~/.yabai/create_space.sh 01 && yabai -m space --focus space_01 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 2 : ~/.yabai/create_space.sh 02 && yabai -m space --focus space_02 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 3 : ~/.yabai/create_space.sh 03 && yabai -m space --focus space_03 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 4 : ~/.yabai/create_space.sh 04 && yabai -m space --focus space_04 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 5 : ~/.yabai/create_space.sh 05 && yabai -m space --focus space_05 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 6 : ~/.yabai/create_space.sh 06 && yabai -m space --focus space_06 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 7 : ~/.yabai/create_space.sh 07 && yabai -m space --focus space_07 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 8 : ~/.yabai/create_space.sh 08 && yabai -m space --focus space_08 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 9 : ~/.yabai/create_space.sh 09 && yabai -m space --focus space_09 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - f1 : ~/.yabai/create_space.sh 09 && yabai -m space --focus space_09 && ~/.yabai/notify_bar.sh
-cmd + ctrl + alt - 0 : ~/.yabai/create_space.sh 10 && yabai -m space --focus space_10 && ~/.yabai/notify_bar.sh
+# Focus spaces (1-6 are workspace-specific, 7-10 are shared)
+cmd + ctrl + alt - 1 : ~/.yabai/focus_space.sh 01
+cmd + ctrl + alt - 2 : ~/.yabai/focus_space.sh 02
+cmd + ctrl + alt - 3 : ~/.yabai/focus_space.sh 03
+cmd + ctrl + alt - 4 : ~/.yabai/focus_space.sh 04
+cmd + ctrl + alt - 5 : ~/.yabai/focus_space.sh 05
+cmd + ctrl + alt - 6 : ~/.yabai/focus_space.sh 06
+cmd + ctrl + alt - 7 : ~/.yabai/focus_space.sh 07
+cmd + ctrl + alt - 8 : ~/.yabai/focus_space.sh 08
+cmd + ctrl + alt - 9 : ~/.yabai/focus_space.sh 09
+cmd + ctrl + alt - f1 : ~/.yabai/focus_space.sh 09
+cmd + ctrl + alt - 0 : ~/.yabai/focus_space.sh 10
 # Set backtick the same as 0
-cmd + ctrl + alt - 0x32 : ~/.yabai/create_space.sh 10 && yabai -m space --focus space_10 && ~/.yabai/notify_bar.sh
+cmd + ctrl + alt - 0x32 : ~/.yabai/focus_space.sh 10
 
-# Move window across spaces
-shift + cmd + ctrl + alt - 1 : ~/.yabai/create_space.sh 01 && yabai -m window --space space_01 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 2 : ~/.yabai/create_space.sh 02 && yabai -m window --space space_02 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 3 : ~/.yabai/create_space.sh 03 && yabai -m window --space space_03 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 4 : ~/.yabai/create_space.sh 04 && yabai -m window --space space_04 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 5 : ~/.yabai/create_space.sh 05 && yabai -m window --space space_05 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 6 : ~/.yabai/create_space.sh 06 && yabai -m window --space space_06 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 7 : ~/.yabai/create_space.sh 07 && yabai -m window --space space_07 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 8 : ~/.yabai/create_space.sh 08 && yabai -m window --space space_08 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 9 : ~/.yabai/create_space.sh 09 && yabai -m window --space space_09 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - f1 : ~/.yabai/create_space.sh 09 && yabai -m window --space space_09 && ~/.yabai/notify_bar.sh
-shift + cmd + ctrl + alt - 0 : ~/.yabai/create_space.sh 10 && yabai -m window --space space_10 && ~/.yabai/notify_bar.sh
+# Move window to spaces (1-6 are workspace-specific, 7-10 are shared)
+shift + cmd + ctrl + alt - 1 : ~/.yabai/move_to_space.sh 01
+shift + cmd + ctrl + alt - 2 : ~/.yabai/move_to_space.sh 02
+shift + cmd + ctrl + alt - 3 : ~/.yabai/move_to_space.sh 03
+shift + cmd + ctrl + alt - 4 : ~/.yabai/move_to_space.sh 04
+shift + cmd + ctrl + alt - 5 : ~/.yabai/move_to_space.sh 05
+shift + cmd + ctrl + alt - 6 : ~/.yabai/move_to_space.sh 06
+shift + cmd + ctrl + alt - 7 : ~/.yabai/move_to_space.sh 07
+shift + cmd + ctrl + alt - 8 : ~/.yabai/move_to_space.sh 08
+shift + cmd + ctrl + alt - 9 : ~/.yabai/move_to_space.sh 09
+shift + cmd + ctrl + alt - f1 : ~/.yabai/move_to_space.sh 09
+shift + cmd + ctrl + alt - 0 : ~/.yabai/move_to_space.sh 10
 # Set backtick the same as 0
-shift + cmd + ctrl + alt - 0x32 : ~/.yabai/create_space.sh 10 && yabai -m window --space space_10 && ~/.yabai/notify_bar.sh
+shift + cmd + ctrl + alt - 0x32 : ~/.yabai/move_to_space.sh 10
 
 # set insertion point in focused container
 cmd + ctrl + alt - h : yabai -m window --insert east
@@ -209,8 +209,9 @@ cmd + ctrl + alt - return : open -a iTerm -n
 cmd + ctrl + alt - x : open ~
 
 
-:: default : echo default > ~/.skhd_state && ~/.yabai/notify_bar_status.sh
-:: resize  : echo resize > ~/.skhd_state && ~/.yabai/notify_bar_status.sh
+:: default : ~/.yabai/state.sh set skhd.mode default && ~/.yabai/notify_bar_status.sh
+:: resize  : ~/.yabai/state.sh set skhd.mode resize && ~/.yabai/notify_bar_status.sh
+:: movewin @ : ~/.yabai/state.sh set skhd.mode movewin && ~/.yabai/notify_bar_status.sh
 
 default  <  cmd + ctrl + alt - r         ; resize
 resize   <  escape         ; default
@@ -225,6 +226,23 @@ resize   <  shift - up     : yabai -m window --resize top:0:-20 ; yabai -m windo
 resize   <  shift - down   : yabai -m window --resize bottom:0:20 ; yabai -m window --resize top:0:20
 resize   <  shift - left   : yabai -m window --resize left:-20:0 ; yabai -m window --resize right:-20:0
 resize   <  shift - right  : yabai -m window --resize right:20:0 ; yabai -m window --resize left:20:0
+
+# Workspace navigation
+cmd + ctrl + alt - w : ~/.yabai/workspaces.sh cycle
+
+# Move window to another workspace (modal mode)
+# Press cmd+ctrl+alt+shift+w to enter mode, then 1-9 to select target workspace
+default  <  shift + cmd + ctrl + alt - w ; movewin
+movewin  <  escape         ; default
+movewin  <  1              : ~/.yabai/move_to_workspace.sh 1 ; skhd -k "escape"
+movewin  <  2              : ~/.yabai/move_to_workspace.sh 2 ; skhd -k "escape"
+movewin  <  3              : ~/.yabai/move_to_workspace.sh 3 ; skhd -k "escape"
+movewin  <  4              : ~/.yabai/move_to_workspace.sh 4 ; skhd -k "escape"
+movewin  <  5              : ~/.yabai/move_to_workspace.sh 5 ; skhd -k "escape"
+movewin  <  6              : ~/.yabai/move_to_workspace.sh 6 ; skhd -k "escape"
+movewin  <  7              : ~/.yabai/move_to_workspace.sh 7 ; skhd -k "escape"
+movewin  <  8              : ~/.yabai/move_to_workspace.sh 8 ; skhd -k "escape"
+movewin  <  9              : ~/.yabai/move_to_workspace.sh 9 ; skhd -k "escape"
 
 #######################
 #### Sample Config ####

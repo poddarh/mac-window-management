@@ -40,7 +40,11 @@ export const render = ({ output }) => {
   }
   return (
     <div style={style}>
-      <Desktop output={data.spaces} displays={data.displays} />
+      <Desktop
+        output={data.spaces}
+        displays={data.displays}
+        activeWorkspace={data.activeWorkspace || "default"}
+      />
     </div>
   );
 };

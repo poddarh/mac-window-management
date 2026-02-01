@@ -1,20 +1,10 @@
 #!/bin/sh
 
 PATH=/opt/homebrew/bin/:$PATH
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 YABAI_DIR="$HOME/.yabai"
 
-# Check if yabai exists
-if ! [ -x "$(command -v yabai)" ]; then
-  echo "{\"error\":\"yabai binary not found\"}"
-  exit 1
-fi
-
-SPACES=$(yabai -m query --spaces)
-DISPLAYS=$(yabai -m query --displays)
-
 # Get focused space label
-FOCUSED_SPACE=$(echo "$SPACES" | jq -r '.[] | select(."has-focus") | .label')
+FOCUSED_SPACE=$(yabai -m query --spaces 2>/dev/null | jq -r '.[] | select(."has-focus") | .label')
 
 # Derive active workspace from focused space if it's a workspace-specific space
 # Pattern: {workspace}_0[1-6]
@@ -37,8 +27,6 @@ fi
 
 echo $(cat <<-EOF
 {
-  "spaces": $SPACES,
-  "displays": $DISPLAYS,
   "activeWorkspace": "$ACTIVE_WORKSPACE",
   "workspaces": $WORKSPACE_LIST
 }

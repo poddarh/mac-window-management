@@ -18,18 +18,64 @@ const getCurrentDisplayId = (displays) => {
   return display.index;
 }
 
-const renderSpace = (index, label, focused, visible, windows) => {
+// Check if a space belongs to the active workspace or is a shared space
+const isSpaceVisible = (label, activeWorkspace) => {
+  if (!label || label === "") {
+    // Unlabeled spaces are visible
+    return true;
+  }
+
+  // Shared spaces (space_07 through space_10)
+  if (/^space_0[7-9]$/.test(label) || label === "space_10") {
+    return true;
+  }
+
+  // Workspace-specific spaces (activeWorkspace_01 through activeWorkspace_06)
+  const workspacePattern = new RegExp(`^${activeWorkspace}_0[1-6]$`);
+  if (workspacePattern.test(label)) {
+    return true;
+  }
+
+  return false;
+};
+
+// Get display number for a space label
+const getDisplayNumber = (label, activeWorkspace) => {
+  if (!label || label === "") {
+    return label;
+  }
+
+  // Shared spaces: space_07 -> 7, space_10 -> 10
+  if (/^space_0[7-9]$/.test(label)) {
+    return parseInt(label.substr(6));
+  }
+  if (label === "space_10") {
+    return 10;
+  }
+
+  // Workspace-specific spaces: {workspace}_01 -> 1
+  const workspacePattern = new RegExp(`^${activeWorkspace}_0([1-6])$`);
+  const match = label.match(workspacePattern);
+  if (match) {
+    return parseInt(match[1]);
+  }
+
+  return label;
+};
+
+const renderSpace = (index, label, focused, visible, windows, activeWorkspace) => {
   let contentStyle = JSON.parse(JSON.stringify(desktopStyle));
 
   let hasWindows = windows.length > 0;
 
-  let name = "i" + index;
-  if (label !== undefined && label.startsWith("space_")) {
-    name = "" + parseInt(label.substr(6));
+  let name = getDisplayNumber(label, activeWorkspace);
+  if (name === label || name === "" || name === undefined) {
+    // Fallback for unlabeled or unrecognized labels
+    name = "i" + index;
   }
 
   if (focused) {
-    contentStyle.color = styles.colors.fg;
+    contentStyle.color = styles.colors.accent;
     contentStyle.fontWeight = "700";
   } else if (visible) {
     contentStyle.color = styles.colors.fg;
@@ -49,14 +95,29 @@ const renderSpace = (index, label, focused, visible, windows) => {
   );
 };
 
-const render = ({ output, displays }) => {
+const render = ({ output, displays, activeWorkspace }) => {
   if (typeof output === "undefined") return null;
   const displayId = getCurrentDisplayId(displays);
 
-  output = output.sort((a, b) => a.label.localeCompare(b.label));
-  output = output.filter(space => space.display == displayId);
+  // Filter to current display
+  let filteredSpaces = output.filter(space => space.display == displayId);
 
-  let allWindows = output.reduce((agg, space) => agg.concat(space.windows), []);
+  // Filter by active workspace
+  filteredSpaces = filteredSpaces.filter(space =>
+    isSpaceVisible(space.label, activeWorkspace)
+  );
+
+  // Sort spaces: workspace-specific (1-6) first, then shared (7-10)
+  filteredSpaces = filteredSpaces.sort((a, b) => {
+    const aNum = getDisplayNumber(a.label, activeWorkspace);
+    const bNum = getDisplayNumber(b.label, activeWorkspace);
+    if (typeof aNum === 'number' && typeof bNum === 'number') {
+      return aNum - bNum;
+    }
+    return String(a.label).localeCompare(String(b.label));
+  });
+
+  let allWindows = filteredSpaces.reduce((agg, space) => agg.concat(space.windows), []);
 
   let windowsToCount = allWindows.reduce((agg, window) => {
     let windowsOnScreen = agg.hasOwnProperty(window) ? agg[window] : 0;
@@ -65,20 +126,20 @@ const render = ({ output, displays }) => {
   }, {});
 
   let windowsOnAllSpaces = Object.keys(windowsToCount)
-                                 .filter(window => windowsToCount[window] == output.length)
+                                 .filter(window => windowsToCount[window] == filteredSpaces.length)
                                  .map(windowStr => parseInt(windowStr));
 
-  output = output.map(space => {
+  filteredSpaces = filteredSpaces.map(space => {
     space.windows = space.windows.filter(window => !windowsOnAllSpaces.includes(window));
     return space;
   });
 
-  output = output.filter(space => space.windows.length > 0 || space["is-visible"]);
+  filteredSpaces = filteredSpaces.filter(space => space.windows.length > 0 || space["is-visible"]);
 
   const spaces = [];
 
-  output.forEach(function (space) {
-    spaces.push(renderSpace(space.index, space.label, space["has-focus"], space["is-visible"], space.windows));
+  filteredSpaces.forEach(function (space) {
+    spaces.push(renderSpace(space.index, space.label, space["has-focus"], space["is-visible"], space.windows, activeWorkspace));
   });
 
   return (

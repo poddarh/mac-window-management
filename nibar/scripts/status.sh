@@ -22,7 +22,15 @@ LOAD_AVERAGE=$(sysctl -n vm.loadavg | awk '{print $2}')
 WIFI_STATUS=$(ifconfig en0 | grep status | cut -c 10-)
 WIFI_SSID=$(ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}' | cut -c -24)
 
-SKHD_MODE=$(cat ~/.skhd_state)
+YABAI_DIR="$HOME/.yabai"
+
+# Get skhd mode from state.json (with fallback to legacy file during migration)
+SKHD_MODE="default"
+if [ -f "$YABAI_DIR/state.json" ]; then
+    SKHD_MODE=$(cat "$YABAI_DIR/state.json" | jq -r '.skhd.mode // "default"')
+elif [ -f "$HOME/.skhd_state" ]; then
+    SKHD_MODE=$(cat ~/.skhd_state)
+fi
 
 YABAI_ACTIVE_WINDOW=$(yabai -m query --windows --window 2>/dev/null || echo null)
 
