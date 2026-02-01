@@ -122,6 +122,23 @@ echo "Starting skhd..."
 skhd --start-service || echo "skhd service may already be running"
 
 echo ""
+echo "=== Configuring macOS Dock ==="
+
+# Auto-hide the dock
+defaults write com.apple.dock autohide -bool true
+
+# Remove dock auto-hide delay
+defaults write com.apple.dock autohide-delay -float 0
+
+# Speed up dock hide/show animation
+defaults write com.apple.dock autohide-time-modifier -float 0.5
+
+# Restart dock to apply changes
+killall Dock
+
+echo "✓ Dock configured to auto-hide"
+
+echo ""
 echo "=== Setup complete! ==="
 echo ""
 echo "Next steps:"
