@@ -20,14 +20,19 @@ fi
 # Get the current display
 current_display="$(yabai -m query --spaces | jq 'map(select(."has-focus"))[0].display')"
 
-# Create a new space
-yabai -m space --create
+# Create a new space on the current display
+yabai -m space --create --display $current_display
+
+# Get the index for the newly created space (it's the last space on this display)
+new_index="$(yabai -m query --spaces --display $current_display | jq '.[-1].index')"
 
 # Get the index at which the new space should be inserted
-insertion_index="$(yabai -m query --spaces --display $current_display | jq --arg index "space_$index" 'map(select(.label > $index))[0].index // .[-1].index')"
-
-# Get the index for the newly created space
-new_index="$(yabai -m query --spaces --display $current_display | jq '.[-1].index')"
+# Extract numeric suffix for proper numeric comparison (string comparison fails for space_09 vs space_10)
+# If no space with a larger label exists, use new_index (no move needed)
+insertion_index="$(yabai -m query --spaces --display $current_display | jq --arg index "$index" --argjson fallback "$new_index" '
+  [.[] | select(.label | test("^space_[0-9]+$")) | {index: .index, num: (.label | ltrimstr("space_") | tonumber)}]
+  | map(select(.num > ($index | tonumber)))[0].index // $fallback
+')"
 
 # Move the new space in the right location
 yabai -m space $new_index --label "space_$index"
