@@ -47,18 +47,14 @@ yabai -m rule --add app="^Cisco Secure Client$" manage=off
 yabai -m rule --add app="^zoom.us$" manage=on
 
 yabai -m signal --add event=display_changed \
-    action="osascript -e 'tell application \"Übersicht\" to refresh widget id \"nibar-spaces-jsx\"'"
+    action="~/.yabai/lib/refresh_bar.sh spaces workspace"
 
 # https://github.com/koekeishiya/yabai/issues/535
 yabai -m signal --add event=space_changed \
-    action="osascript -e 'tell application id \"tracesOf.Uebersicht\" to refresh widget id \"nibar-spaces-jsx\"'"
+    action="~/.yabai/lib/refresh_bar.sh spaces workspace"
 yabai -m signal --add event=space_changed \
-    action="osascript -e 'tell application id \"tracesOf.Uebersicht\" to refresh widget id \"nibar-bar-jsx\"'"
-yabai -m signal --add event=space_changed \
-    action="osascript -e 'tell application id \"tracesOf.Uebersicht\" to refresh widget id \"nibar-status-jsx\"'"
-yabai -m signal --add event=space_changed \
-    action="~/.yabai/sync_workspace.sh"
+    action="~/.yabai/workspaces/sync.sh"
 
-yabai -m signal --add event=window_focused action="~/.yabai/notify_bar_status.sh"
+yabai -m signal --add event=window_focused action="~/.yabai/lib/refresh_bar.sh status"
 
 echo "yabai configuration loaded.."
