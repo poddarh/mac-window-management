@@ -20,7 +20,19 @@ fi
 LOAD_AVERAGE=$(sysctl -n vm.loadavg | awk '{print $2}')
 
 WIFI_STATUS=$(ifconfig en0 | grep status | cut -c 10-)
-WIFI_SSID=$(ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}' | cut -c -24)
+
+# Try to get WiFi SSID using Shortcuts (works on macOS Sonoma+)
+# Requires a Shortcut named "GetWiFiSSID" that outputs the network name
+# Fallback to ipconfig if Shortcut doesn't exist
+WIFI_SSID=$(shortcuts run "GetWiFiSSID" 2>/dev/null)
+if [ -z "$WIFI_SSID" ] || [ "$WIFI_SSID" = "<redacted>" ]; then
+    # Fallback to ipconfig (may show <redacted> without Location Services)
+    WIFI_SSID=$(ipconfig getsummary en0 2>/dev/null | awk -F ' SSID : '  '/ SSID : / {print $2}' | cut -c -24)
+fi
+# If still redacted or empty, just show WiFi icon
+if [ "$WIFI_SSID" = "<redacted>" ]; then
+    WIFI_SSID=""
+fi
 
 YABAI_DIR="$HOME/.yabai"
 
