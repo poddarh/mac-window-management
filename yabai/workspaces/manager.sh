@@ -214,11 +214,23 @@ delete() {
         exit 1
     fi
 
-    # Check if workspace has any windows
-    local window_count
-    window_count=$(yabai -m query --spaces | jq -r --arg prefix "${name}_" '
-        [.[] | select(.label | startswith($prefix)) | .windows[]] | length
+    # Get workspace-specific space indices (only spaces 1-6, pattern: {name}_0[1-6])
+    local workspace_space_indices
+    workspace_space_indices=$(yabai -m query --spaces | jq -r --arg name "$name" '
+        [.[] | select(.label | test("^" + $name + "_0[1-6]$")) | .index] | join(",")
     ')
+
+    # Count unique, non-sticky windows on workspace-specific spaces only
+    local window_count=0
+    if [[ -n "$workspace_space_indices" ]]; then
+        window_count=$(yabai -m query --windows | jq -r --arg spaces "$workspace_space_indices" '
+            ($spaces | split(",") | map(select(. != "") | tonumber)) as $space_list |
+            [.[] | select(
+                (.["is-sticky"] != true) and
+                (.space as $s | $space_list | index($s) != null)
+            ) | .id] | unique | length
+        ')
+    fi
 
     if [[ "$window_count" -gt 0 ]]; then
         echo "Cannot delete workspace '$name': it has $window_count window(s). Move or close them first."

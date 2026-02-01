@@ -28,7 +28,10 @@ const workspaceStyle = {
 const addButtonStyle = {
   cursor: "pointer",
   userSelect: "none",
-  color: styles.colors.dim
+  color: styles.colors.dim,
+  opacity: 0.6,
+  fontSize: "14px",
+  padding: "0 4px"
 };
 
 const inputStyle = {
@@ -314,7 +317,7 @@ const WorkspaceSwitcher = ({ activeWorkspace, workspaces, workspaceProfiles }) =
         onClick={handleAddClick}
         title="Create new workspace"
       >
-        [+]
+        +
       </span>
     </div>
   );
