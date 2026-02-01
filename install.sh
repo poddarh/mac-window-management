@@ -12,6 +12,7 @@ echo "  - Hammerspoon (automation tool)"
 echo "  - Übersicht (desktop widgets)"
 echo "  - Stackline (window stack indicators)"
 echo "  - Nibar (status bar widget)"
+echo "  - Karabiner-Elements (keyboard customization)"
 echo ""
 
 # Check for Homebrew
@@ -30,6 +31,7 @@ brew install koekeishiya/formulae/yabai || echo "yabai already installed"
 brew install koekeishiya/formulae/skhd || echo "skhd already installed"
 brew install --cask hammerspoon || echo "hammerspoon already installed"
 brew install --cask ubersicht || echo "übersicht already installed"
+brew install --cask karabiner-elements || echo "karabiner-elements already installed"
 
 echo ""
 echo "=== Creating symlinks ==="
@@ -111,6 +113,11 @@ fi
 ln -s "$SCRIPT_DIR/nibar" "$UBERSICHT_WIDGETS/nibar"
 echo "✓ Linked Übersicht nibar widget"
 
+# Add Karabiner Caps Lock hyper key rule
+echo ""
+echo "=== Configuring Karabiner-Elements ==="
+"$SCRIPT_DIR/karabiner/install_rule.sh"
+
 echo ""
 echo "=== Starting services ==="
 
@@ -144,9 +151,10 @@ echo ""
 echo "Next steps:"
 echo "1. Open Hammerspoon and grant Accessibility permissions"
 echo "2. Open Übersicht to see the nibar status bar"
-echo "3. You may need to grant Accessibility permissions to yabai"
+echo "3. Open Karabiner-Elements and grant Input Monitoring permissions"
+echo "4. You may need to grant Accessibility permissions to yabai"
 echo "   Run: sudo yabai --load-sa"
-echo "4. For yabai scripting additions, see: https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release)"
+echo "5. For yabai scripting additions, see: https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release)"
 echo ""
 echo "To restart services:"
 echo "  yabai --restart-service"
