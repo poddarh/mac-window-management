@@ -1,7 +1,7 @@
 import Desktop from "./lib/Desktop.jsx";
 import Error from "./lib/Error.jsx";
 import parse from "./lib/parse.jsx";
-import styles from "./lib/styles.jsx";
+import styles, { typographyStyle } from "./lib/styles.jsx";
 
 const style = {
   padding: "0 8px",
@@ -12,11 +12,8 @@ const style = {
   overflow: "hidden",
   left: "0px",
   bottom: "0px",
-  fontFamily: styles.fontFamily,
-  lineHeight: styles.lineHeight,
-  fontSize: styles.fontSize,
   color: styles.colors.dim,
-  fontWeight: styles.fontWeight
+  ...typographyStyle
 };
 
 export const refreshFrequency = false;

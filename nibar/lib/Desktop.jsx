@@ -1,4 +1,4 @@
-import styles from "./styles.jsx";
+import styles, { getProfileColor } from "./styles.jsx";
 import * as Uebersicht from 'uebersicht'
 
 const containerStyle = {
@@ -24,11 +24,6 @@ const getCurrentDisplayId = (displays) => {
   let display = displays.filter(display => display.id == displayIndex)[0];
   return display.index;
 }
-
-// Get the color for a profile type
-const getProfileColor = (profileType) => {
-  return profileType === "work" ? styles.colors.work : styles.colors.personal;
-};
 
 // Check if a space belongs to the active workspace or is a profile-shared space
 const isSpaceVisible = (label, activeWorkspace, profileType) => {

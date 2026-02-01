@@ -4,22 +4,17 @@
 # If Chrome is already open on the current workspace, focus that window
 # Usage: open_chrome.sh [url]
 
-PATH=/opt/homebrew/bin:$PATH
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/config.sh"
 
 # Get active workspace
-workspace=$("$SCRIPT_DIR/workspaces.sh" active 2>/dev/null || echo "personal")
+workspace=$("$SCRIPT_DIR/workspaces/manager.sh" active 2>/dev/null || echo "personal")
 
 # Get profile type for this workspace (work or personal)
-profile_type=$("$SCRIPT_DIR/workspaces.sh" profile "$workspace" 2>/dev/null || echo "personal")
+profile_type=$("$SCRIPT_DIR/workspaces/manager.sh" profile "$workspace" 2>/dev/null || echo "personal")
 
-# Map profile type to Chrome profile directory
-if [[ "$profile_type" == "work" ]]; then
-    profile="Default"
-else
-    profile="Profile 10"
-fi
+# Map profile type to Chrome profile directory using config
+profile=$(get_chrome_profile "$profile_type")
 
 # Get all space indices for the current workspace
 # Workspace-specific spaces: {workspace}_01 through {workspace}_06

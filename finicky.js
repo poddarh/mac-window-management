@@ -20,7 +20,9 @@ module.exports = {
       match: () => true,
       browser: function() {
         // Get profile type for active workspace (work or personal)
-        const result = finicky.run("/Users/poddarh/git/window-manager-setup/yabai/workspaces.sh", ["profile"]);
+        // Uses ~/.yabai symlink (see install.sh)
+        const homeDir = finicky.run("/bin/sh", ["-c", "echo $HOME"]).trim();
+        const result = finicky.run(homeDir + "/.yabai/workspaces.sh", ["profile"]);
         const profileType = result.trim();
 
         // Route to appropriate Chrome profile

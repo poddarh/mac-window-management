@@ -1,5 +1,3 @@
-import styles from "./styles.jsx";
-
 const render = ({ output }) => {
   if (output === null || output["has-fullscreen-zoom"] === false) { return null; }
   return (

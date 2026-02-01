@@ -3,7 +3,7 @@
 PATH=/opt/homebrew/bin/:$PATH
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 YABAI_DIR="$HOME/.yabai"
-WORKSPACES_CMD="$HOME/.yabai/workspaces.sh"
+WORKSPACES_CMD="$HOME/.yabai/workspaces/manager.sh"
 
 # Check if yabai exists
 if ! [ -x "$(command -v yabai)" ]; then

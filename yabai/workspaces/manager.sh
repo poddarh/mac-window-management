@@ -4,10 +4,12 @@
 # Manages virtual workspaces where spaces 1-6 are workspace-specific
 # and spaces 7-10 are shared across all workspaces
 
-PATH=/opt/homebrew/bin:$PATH
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STATE_CMD="$SCRIPT_DIR/state.sh"
+YABAI_DIR="$(dirname "$SCRIPT_DIR")"
+source "$YABAI_DIR/lib/config.sh"
+
+STATE_CMD="$YABAI_DIR/state.sh"
+REFRESH_BAR="$YABAI_DIR/lib/refresh_bar.sh"
 
 # List all workspaces
 list() {
@@ -86,8 +88,7 @@ switch() {
 
     # If on a shared space and staying on same profile type, just update state
     if [[ "$on_shared_space" == true && "$current_profile" == "$target_profile" ]]; then
-        osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
-        osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+        "$REFRESH_BAR"
         return
     fi
 
@@ -98,10 +99,9 @@ switch() {
             target_shared_space="${target_profile}_0${shared_space_num}"
         fi
         # Create the space if it doesn't exist
-        "$SCRIPT_DIR/create_space.sh" "$shared_space_num" "$name"
+        "$YABAI_DIR/spaces/create.sh" "$shared_space_num" "$name"
         yabai -m space --focus "$target_shared_space" 2>/dev/null || true
-        osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
-        osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+        "$REFRESH_BAR"
         return
     fi
 
@@ -111,7 +111,7 @@ switch() {
 
     if [[ "$target_spaces" -eq 0 ]]; then
         # No spaces exist for this workspace - create space 01
-        "$SCRIPT_DIR/create_space.sh" "01" "$name"
+        "$YABAI_DIR/spaces/create.sh" "01" "$name"
         yabai -m space --focus "${name}_01"
     else
         # Get last active space for target workspace (default to 1)
@@ -136,8 +136,7 @@ switch() {
     fi
 
     # Notify bar to refresh
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+    "$REFRESH_BAR"
 }
 
 # Create a new workspace
@@ -182,7 +181,7 @@ create() {
 
     # Create the 6 spaces for this workspace
     for i in 01 02 03 04 05 06; do
-        "$SCRIPT_DIR/create_space.sh" "$i" "$name"
+        "$YABAI_DIR/spaces/create.sh" "$i" "$name"
     done
 
     # Switch to the new workspace
@@ -192,8 +191,7 @@ create() {
     yabai -m space --focus "${name}_01" 2>/dev/null || true
 
     # Notify bar to refresh
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+    "$REFRESH_BAR"
 
     echo "Created workspace '$name' with profile '$profile'"
 }
@@ -266,15 +264,14 @@ delete() {
         "$STATE_CMD" set 'workspace.active' "default"
         # Create default workspace spaces
         for i in 01 02 03 04 05 06; do
-            "$SCRIPT_DIR/create_space.sh" "$i" "default"
+            "$YABAI_DIR/spaces/create.sh" "$i" "default"
         done
     fi
 
     "$STATE_CMD" set 'workspace.list' "$new_list"
 
     # Notify bar to refresh
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+    "$REFRESH_BAR"
 
     echo "Deleted workspace '$name'"
 }
@@ -332,8 +329,7 @@ rename() {
     fi
 
     # Notify bar to refresh
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+    "$REFRESH_BAR"
 
     echo "Renamed workspace '$old_name' to '$new_name'"
 }
@@ -373,6 +369,27 @@ profile() {
     fi
 }
 
+# Query workspace data as JSON (for nibar widget)
+# Usage: workspaces.sh query
+query() {
+    local active_workspace
+    active_workspace=$(active)
+
+    local workspace_list
+    workspace_list=$("$STATE_CMD" get 'workspace.list' 2>/dev/null || echo '["default"]')
+
+    local workspace_profiles
+    workspace_profiles=$("$STATE_CMD" get 'workspace.profiles' 2>/dev/null || echo '{}')
+
+    cat <<EOF
+{
+  "activeWorkspace": "$active_workspace",
+  "workspaces": $workspace_list,
+  "workspaceProfiles": $workspace_profiles
+}
+EOF
+}
+
 # Main command dispatcher
 case "$1" in
     list)
@@ -383,6 +400,9 @@ case "$1" in
         ;;
     profile)
         profile "$2"
+        ;;
+    query)
+        query
         ;;
     switch)
         switch "$2"
@@ -400,10 +420,11 @@ case "$1" in
         cycle
         ;;
     *)
-        echo "Usage: $0 {list|active|profile|switch|create|delete|rename|cycle} [args...]"
+        echo "Usage: $0 {list|active|profile|query|switch|create|delete|rename|cycle} [args...]"
         echo "  list              - List all workspaces"
         echo "  active            - Get active workspace name"
         echo "  profile [name]    - Get profile type (work/personal) for workspace"
+        echo "  query             - Get workspace data as JSON (for widgets)"
         echo "  switch <name>     - Switch to a workspace"
         echo "  create <name> [profile] - Create a new workspace (profile: work|personal)"
         echo "  delete <name>     - Delete a workspace"

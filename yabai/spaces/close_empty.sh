@@ -1,5 +1,8 @@
 #!/bin/bash -ex
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+YABAI_DIR="$(dirname "$SCRIPT_DIR")"
+
 die () {
     echo >&2 "$@"
     exit 1
@@ -50,4 +53,4 @@ for display in $(yabai -m query --displays | jq -r '.[].index'); do
     done
 done
 
-osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"'
+"$YABAI_DIR/lib/refresh_bar.sh" spaces

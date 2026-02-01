@@ -80,7 +80,7 @@
 shift + cmd + ctrl + alt - q : yabai -m window --close
 
 # restart yabai (with state preservation)
-shift + cmd + ctrl + alt - r : ~/.yabai/reload_yabai.sh
+shift + cmd + ctrl + alt - r : ~/.yabai/reload.sh
 
 # focus windows
 cmd + ctrl + alt - left : yabai -m window --focus west
@@ -107,7 +107,7 @@ shift + cmd + ctrl + alt - down : yabai -m window --warp south
 
 # toggle window zoom
 # cmd + ctrl + alt - d : yabai -m window --toggle zoom-parent
-cmd + ctrl + alt - f : yabai -m window --toggle zoom-fullscreen && ~/.yabai/notify_bar_status.sh
+cmd + ctrl + alt - f : yabai -m window --toggle zoom-fullscreen && ~/.yabai/lib/refresh_bar.sh status
 
 # balance size of windows
 shift + cmd + ctrl + alt - e : yabai -m space --balance
@@ -121,7 +121,7 @@ shift + cmd + ctrl + alt - c : yabai -m space --create
 shift + cmd + ctrl + alt - d : yabai -m space --destroy
 
 # Delete all empty workspaces
-shift + cmd + ctrl + alt - x : ~/.yabai/close_empty_screens.sh
+shift + cmd + ctrl + alt - x : ~/.yabai/spaces/close_empty.sh
 
 # Create space on the active display
 cmd + ctrl + alt - n : yabai -m space --focus next
@@ -129,34 +129,34 @@ cmd + ctrl + alt - n : yabai -m space --focus next
 cmd + ctrl + alt - p : yabai -m space --focus prev
 
 # Focus spaces (1-6 are workspace-specific, 7-10 are shared)
-cmd + ctrl + alt - 1 : ~/.yabai/focus_space.sh 01
-cmd + ctrl + alt - 2 : ~/.yabai/focus_space.sh 02
-cmd + ctrl + alt - 3 : ~/.yabai/focus_space.sh 03
-cmd + ctrl + alt - 4 : ~/.yabai/focus_space.sh 04
-cmd + ctrl + alt - 5 : ~/.yabai/focus_space.sh 05
-cmd + ctrl + alt - 6 : ~/.yabai/focus_space.sh 06
-cmd + ctrl + alt - 7 : ~/.yabai/focus_space.sh 07
-cmd + ctrl + alt - 8 : ~/.yabai/focus_space.sh 08
-cmd + ctrl + alt - 9 : ~/.yabai/focus_space.sh 09
-cmd + ctrl + alt - f1 : ~/.yabai/focus_space.sh 09
-cmd + ctrl + alt - 0 : ~/.yabai/focus_space.sh 10
+cmd + ctrl + alt - 1 : ~/.yabai/spaces/focus.sh 01
+cmd + ctrl + alt - 2 : ~/.yabai/spaces/focus.sh 02
+cmd + ctrl + alt - 3 : ~/.yabai/spaces/focus.sh 03
+cmd + ctrl + alt - 4 : ~/.yabai/spaces/focus.sh 04
+cmd + ctrl + alt - 5 : ~/.yabai/spaces/focus.sh 05
+cmd + ctrl + alt - 6 : ~/.yabai/spaces/focus.sh 06
+cmd + ctrl + alt - 7 : ~/.yabai/spaces/focus.sh 07
+cmd + ctrl + alt - 8 : ~/.yabai/spaces/focus.sh 08
+cmd + ctrl + alt - 9 : ~/.yabai/spaces/focus.sh 09
+cmd + ctrl + alt - f1 : ~/.yabai/spaces/focus.sh 09
+cmd + ctrl + alt - 0 : ~/.yabai/spaces/focus.sh 10
 # Set backtick the same as 0
-cmd + ctrl + alt - 0x32 : ~/.yabai/focus_space.sh 10
+cmd + ctrl + alt - 0x32 : ~/.yabai/spaces/focus.sh 10
 
 # Move window to spaces (1-6 are workspace-specific, 7-10 are shared)
-shift + cmd + ctrl + alt - 1 : ~/.yabai/move_to_space.sh 01
-shift + cmd + ctrl + alt - 2 : ~/.yabai/move_to_space.sh 02
-shift + cmd + ctrl + alt - 3 : ~/.yabai/move_to_space.sh 03
-shift + cmd + ctrl + alt - 4 : ~/.yabai/move_to_space.sh 04
-shift + cmd + ctrl + alt - 5 : ~/.yabai/move_to_space.sh 05
-shift + cmd + ctrl + alt - 6 : ~/.yabai/move_to_space.sh 06
-shift + cmd + ctrl + alt - 7 : ~/.yabai/move_to_space.sh 07
-shift + cmd + ctrl + alt - 8 : ~/.yabai/move_to_space.sh 08
-shift + cmd + ctrl + alt - 9 : ~/.yabai/move_to_space.sh 09
-shift + cmd + ctrl + alt - f1 : ~/.yabai/move_to_space.sh 09
-shift + cmd + ctrl + alt - 0 : ~/.yabai/move_to_space.sh 10
+shift + cmd + ctrl + alt - 1 : ~/.yabai/spaces/move_window.sh 01
+shift + cmd + ctrl + alt - 2 : ~/.yabai/spaces/move_window.sh 02
+shift + cmd + ctrl + alt - 3 : ~/.yabai/spaces/move_window.sh 03
+shift + cmd + ctrl + alt - 4 : ~/.yabai/spaces/move_window.sh 04
+shift + cmd + ctrl + alt - 5 : ~/.yabai/spaces/move_window.sh 05
+shift + cmd + ctrl + alt - 6 : ~/.yabai/spaces/move_window.sh 06
+shift + cmd + ctrl + alt - 7 : ~/.yabai/spaces/move_window.sh 07
+shift + cmd + ctrl + alt - 8 : ~/.yabai/spaces/move_window.sh 08
+shift + cmd + ctrl + alt - 9 : ~/.yabai/spaces/move_window.sh 09
+shift + cmd + ctrl + alt - f1 : ~/.yabai/spaces/move_window.sh 09
+shift + cmd + ctrl + alt - 0 : ~/.yabai/spaces/move_window.sh 10
 # Set backtick the same as 0
-shift + cmd + ctrl + alt - 0x32 : ~/.yabai/move_to_space.sh 10
+shift + cmd + ctrl + alt - 0x32 : ~/.yabai/spaces/move_window.sh 10
 
 # set insertion point in focused container
 cmd + ctrl + alt - h : yabai -m window --insert east
@@ -178,10 +178,10 @@ cmd + ctrl + alt - pageup : yabai -m window --focus stack.prev
 cmd + ctrl + alt - pagedown : yabai -m window --focus stack.next
 
 # move window up/down within stack (keep focus, refresh stackline)
-shift + cmd + ctrl + alt - 0x21 : ~/.yabai/stack_move_prev.sh
-shift + cmd + ctrl + alt - 0x1E : ~/.yabai/stack_move_next.sh
-shift + cmd + ctrl + alt - pageup : ~/.yabai/stack_move_prev.sh
-shift + cmd + ctrl + alt - pagedown : ~/.yabai/stack_move_next.sh
+shift + cmd + ctrl + alt - 0x21 : ~/.yabai/stacks/move.sh prev
+shift + cmd + ctrl + alt - 0x1E : ~/.yabai/stacks/move.sh next
+shift + cmd + ctrl + alt - pageup : ~/.yabai/stacks/move.sh prev
+shift + cmd + ctrl + alt - pagedown : ~/.yabai/stacks/move.sh next
 
 # move space to a different monitor
 cmd + ctrl + alt - m : yabai -m space --display recent
@@ -209,8 +209,8 @@ cmd + ctrl + alt - return : open -a iTerm -n
 cmd + ctrl + alt - x : open ~
 
 
-:: default : ~/.yabai/state.sh set skhd.mode default && ~/.yabai/notify_bar_status.sh
-:: resize  : ~/.yabai/state.sh set skhd.mode resize && ~/.yabai/notify_bar_status.sh
+:: default : ~/.yabai/state.sh set skhd.mode default && ~/.yabai/lib/refresh_bar.sh status
+:: resize  : ~/.yabai/state.sh set skhd.mode resize && ~/.yabai/lib/refresh_bar.sh status
 
 default  <  cmd + ctrl + alt - r         ; resize
 resize   <  escape         ; default
@@ -227,13 +227,13 @@ resize   <  shift - left   : yabai -m window --resize left:-20:0 ; yabai -m wind
 resize   <  shift - right  : yabai -m window --resize right:20:0 ; yabai -m window --resize left:20:0
 
 # Workspace navigation
-cmd + ctrl + alt - w : ~/.yabai/workspaces.sh cycle
+cmd + ctrl + alt - w : ~/.yabai/workspaces/manager.sh cycle
 
 # Move window to another workspace (dialog)
-shift + cmd + ctrl + alt - w : ~/.yabai/move_to_workspace_dialog.sh
+shift + cmd + ctrl + alt - w : ~/.yabai/workspaces/move_window_dialog.sh
 
 # Move space to another workspace (dialog)
-shift + cmd + ctrl + alt - m : ~/.yabai/move_space_dialog.sh
+shift + cmd + ctrl + alt - m : ~/.yabai/workspaces/move_space_dialog.sh
 
 #######################
 #### Sample Config ####

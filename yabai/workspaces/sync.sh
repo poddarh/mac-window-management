@@ -4,10 +4,11 @@
 # Called when space changes externally (via Mission Control, etc.)
 # Updates stored state so shared spaces know which workspace is active
 
-PATH=/opt/homebrew/bin:$PATH
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STATE_CMD="$SCRIPT_DIR/state.sh"
+YABAI_DIR="$(dirname "$SCRIPT_DIR")"
+source "$YABAI_DIR/lib/config.sh"
+
+STATE_CMD="$YABAI_DIR/state.sh"
 
 # Get currently focused space label
 current_space=$(yabai -m query --spaces | jq -r '.[] | select(."has-focus") | .label')
@@ -22,4 +23,4 @@ if [[ "$current_space" =~ ^([a-zA-Z][a-zA-Z0-9_]*)_0[1-6]$ ]]; then
 fi
 
 # Refresh the workspace widget
-osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-workspace-jsx"' 2>/dev/null || true
+"$YABAI_DIR/lib/refresh_bar.sh" workspace

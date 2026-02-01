@@ -1,7 +1,7 @@
 import * as Uebersicht from 'uebersicht'
 import parse from "./lib/parse.jsx";
 import Error from "./lib/Error.jsx";
-import styles from "./lib/styles.jsx";
+import styles, { getProfileColor, typographyStyle } from "./lib/styles.jsx";
 
 const { React } = Uebersicht;
 const { useState, useEffect } = React;
@@ -16,11 +16,8 @@ const containerStyle = {
   left: "50%",
   transform: "translateX(-50%)",
   bottom: "0px",
-  fontFamily: styles.fontFamily,
-  lineHeight: styles.lineHeight,
-  fontSize: styles.fontSize,
-  color: styles.colors.dim,
-  fontWeight: styles.fontWeight
+  ...typographyStyle,
+  color: styles.colors.dim
 };
 
 const workspaceStyle = {
@@ -58,11 +55,6 @@ const separatorStyle = {
   margin: "0 4px"
 };
 
-// Get color for profile type
-const getProfileColor = (profileType) => {
-  return profileType === "work" ? styles.colors.work : styles.colors.personal;
-};
-
 // Workspace widget component
 const WorkspaceSwitcher = ({ activeWorkspace, workspaces, workspaceProfiles }) => {
   const [mode, setMode] = useState('normal'); // 'normal', 'create', 'selectProfile', 'rename', 'delete'
@@ -96,13 +88,13 @@ const WorkspaceSwitcher = ({ activeWorkspace, workspaces, workspaceProfiles }) =
   const switchToWorkspace = (name) => {
     if (mode !== 'normal') return;
     if (name !== activeWorkspace) {
-      Uebersicht.run(`$HOME/.yabai/workspaces.sh switch "${name}"`);
+      Uebersicht.run(`$HOME/.yabai/workspaces/manager.sh switch "${name}"`);
     }
   };
 
   const createWorkspace = (name, profile) => {
     if (name && name.trim()) {
-      Uebersicht.run(`$HOME/.yabai/workspaces.sh create "${name.trim()}" "${profile}"`);
+      Uebersicht.run(`$HOME/.yabai/workspaces/manager.sh create "${name.trim()}" "${profile}"`);
     }
     setMode('normal');
     setInputValue('');
@@ -111,7 +103,7 @@ const WorkspaceSwitcher = ({ activeWorkspace, workspaces, workspaceProfiles }) =
 
   const renameWorkspace = (oldName, newName) => {
     if (newName && newName.trim() && newName.trim() !== oldName) {
-      Uebersicht.run(`$HOME/.yabai/workspaces.sh rename "${oldName}" "${newName.trim()}"`);
+      Uebersicht.run(`$HOME/.yabai/workspaces/manager.sh rename "${oldName}" "${newName.trim()}"`);
     }
     setMode('normal');
     setInputValue('');
@@ -119,7 +111,7 @@ const WorkspaceSwitcher = ({ activeWorkspace, workspaces, workspaceProfiles }) =
   };
 
   const deleteWorkspace = (name) => {
-    Uebersicht.run(`$HOME/.yabai/workspaces.sh delete "${name}"`);
+    Uebersicht.run(`$HOME/.yabai/workspaces/manager.sh delete "${name}"`);
     setMode('normal');
     setTargetWorkspace('');
   };
@@ -329,7 +321,7 @@ const WorkspaceSwitcher = ({ activeWorkspace, workspaces, workspaceProfiles }) =
 };
 
 export const refreshFrequency = false;
-export const command = "./nibar/scripts/workspaces.sh";
+export const command = "$HOME/.yabai/workspaces/manager.sh query";
 
 export const render = ({ output }) => {
   const data = parse(output);

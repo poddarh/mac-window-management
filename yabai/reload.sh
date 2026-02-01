@@ -137,7 +137,8 @@ restore_state() {
     echo "State restored!"
 
     # Refresh the status bar
-    osascript -e 'tell application id "tracesOf.Uebersicht" to refresh widget id "nibar-spaces-jsx"' 2>/dev/null || true
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    "$SCRIPT_DIR/lib/refresh_bar.sh" spaces
 }
 
 show_usage() {

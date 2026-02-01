@@ -11,7 +11,7 @@ import Wifi from "./lib/Wifi.jsx";
 import Mic from "./lib/Mic.jsx";
 import Error from "./lib/Error.jsx";
 import parse from "./lib/parse.jsx";
-import styles from "./lib/styles.jsx";
+import styles, { typographyStyle } from "./lib/styles.jsx";
 
 const style = {
   display: "grid",
@@ -23,10 +23,7 @@ const style = {
   right: "0px",
   bottom: "0px",
   color: styles.colors.dim,
-  fontFamily: styles.fontFamily,
-  fontSize: styles.fontSize,
-  lineHeight: styles.lineHeight,
-  fontWeight: styles.fontWeight
+  ...typographyStyle
 };
 
 export const refreshFrequency = 5000;
