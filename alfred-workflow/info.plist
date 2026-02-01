@@ -80,8 +80,9 @@
 	<key>readme</key>
 	<string>Opens Google Chrome in the correct profile based on your active yabai workspace.
 
-- Work workspace → Default profile
-- Other workspaces → Profile 10 (Personal)</string>
+Chrome profiles are configured in yabai/lib/config.sh:
+- Work workspaces use CHROME_PROFILE_WORK
+- Personal workspaces use CHROME_PROFILE_PERSONAL</string>
 	<key>uidata</key>
 	<dict>
 		<key>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</key>

@@ -1,14 +1,19 @@
 // Finicky configuration
 // Routes URLs to Chrome profiles based on active yabai workspace
 
+// ============================================================
+// Chrome Profile Configuration
+// Update these to match your Chrome profile directories
+// Found in: ~/Library/Application Support/Google/Chrome/
+// ============================================================
 const WORK_PROFILE = {
   name: "Google Chrome",
-  profile: "Default"
+  profile: "Default"  // Change to your work Chrome profile directory
 };
 
 const PERSONAL_PROFILE = {
   name: "Google Chrome",
-  profile: "Profile 10"
+  profile: "Profile 10"  // Change to your personal Chrome profile directory
 };
 
 module.exports = {

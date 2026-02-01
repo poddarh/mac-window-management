@@ -19,6 +19,9 @@ YABAI_TEMP_STATE="/tmp/yabai_state.json"
 # ============================================================
 
 # Chrome profile directories (relative to ~/Library/Application Support/Google/Chrome/)
+# To find your profile directories, look in ~/Library/Application Support/Google/Chrome/
+# Each profile has a folder like "Default", "Profile 1", "Profile 2", etc.
+# You can also check chrome://version in each profile to see its directory name.
 CHROME_PROFILE_WORK="Default"
 CHROME_PROFILE_PERSONAL="Profile 10"
 
