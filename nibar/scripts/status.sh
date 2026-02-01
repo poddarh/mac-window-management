@@ -21,17 +21,44 @@ LOAD_AVERAGE=$(sysctl -n vm.loadavg | awk '{print $2}')
 
 WIFI_STATUS=$(ifconfig en0 | grep status | cut -c 10-)
 
-# Try to get WiFi SSID using Shortcuts (works on macOS Sonoma+)
-# Requires a Shortcut named "GetWiFiSSID" that outputs the network name
-# Fallback to ipconfig if Shortcut doesn't exist
-WIFI_SSID=$(shortcuts run "GetWiFiSSID" 2>/dev/null)
-if [ -z "$WIFI_SSID" ] || [ "$WIFI_SSID" = "<redacted>" ]; then
-    # Fallback to ipconfig (may show <redacted> without Location Services)
-    WIFI_SSID=$(ipconfig getsummary en0 2>/dev/null | awk -F ' SSID : '  '/ SSID : / {print $2}' | cut -c -24)
-fi
-# If still redacted or empty, just show WiFi icon
-if [ "$WIFI_SSID" = "<redacted>" ]; then
-    WIFI_SSID=""
+# WiFi SSID caching to avoid running Shortcut too frequently
+# Cache expires after 5 minutes (300 seconds) or when WiFi status changes
+WIFI_CACHE_FILE="/tmp/nibar_wifi_ssid_cache"
+WIFI_CACHE_MAX_AGE=300
+
+get_wifi_ssid() {
+    # Try Shortcuts first (works on macOS Sonoma+)
+    local ssid=$(shortcuts run "GetWiFiSSID" 2>/dev/null)
+    if [ -z "$ssid" ] || [ "$ssid" = "<redacted>" ]; then
+        # Fallback to ipconfig
+        ssid=$(ipconfig getsummary en0 2>/dev/null | awk -F ' SSID : '  '/ SSID : / {print $2}' | cut -c -24)
+    fi
+    if [ "$ssid" = "<redacted>" ]; then
+        ssid=""
+    fi
+    echo "$ssid"
+}
+
+WIFI_SSID=""
+if [ "$WIFI_STATUS" = "active" ]; then
+    # Check if cache exists and is fresh
+    if [ -f "$WIFI_CACHE_FILE" ]; then
+        CACHE_AGE=$(( $(date +%s) - $(stat -f %m "$WIFI_CACHE_FILE") ))
+        if [ "$CACHE_AGE" -lt "$WIFI_CACHE_MAX_AGE" ]; then
+            # Use cached value
+            WIFI_SSID=$(cat "$WIFI_CACHE_FILE")
+        fi
+    fi
+
+    # If no valid cache, fetch fresh SSID
+    if [ -z "$WIFI_SSID" ]; then
+        WIFI_SSID=$(get_wifi_ssid)
+        # Save to cache
+        echo "$WIFI_SSID" > "$WIFI_CACHE_FILE"
+    fi
+else
+    # WiFi inactive, clear cache
+    rm -f "$WIFI_CACHE_FILE" 2>/dev/null
 fi
 
 YABAI_DIR="$HOME/.yabai"
