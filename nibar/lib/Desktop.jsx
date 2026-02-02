@@ -47,6 +47,27 @@ const isSpaceVisible = (label, activeWorkspace, profileType) => {
   return false;
 };
 
+// Check if a space belongs to a different profile
+const isDifferentProfile = (label, profileType) => {
+  if (!label || label === "") return false;
+
+  // Check if it's a space from the other profile
+  const otherProfile = profileType === "work" ? "personal" : "work";
+  const otherProfilePattern = new RegExp(`^${otherProfile}_`);
+  return otherProfilePattern.test(label);
+};
+
+// Get the profile from a space label
+const getSpaceProfile = (label) => {
+  if (!label) return null;
+  if (label.startsWith("work_")) return "work";
+  if (label.startsWith("personal_")) return "personal";
+  // For workspace-specific spaces, extract the workspace name
+  const match = label.match(/^([a-zA-Z][a-zA-Z0-9_]*)_0[1-6]$/);
+  if (match) return match[1];
+  return null;
+};
+
 // Get display number for a space label
 const getDisplayNumber = (label, activeWorkspace, profileType) => {
   if (!label || label === "") {
@@ -84,6 +105,18 @@ const renderSpace = (index, label, focused, visible, windows, activeWorkspace, p
     name = "i" + index;
   }
 
+  // Check if this space is from a different profile
+  const fromDifferentProfile = isDifferentProfile(label, profileType);
+  if (fromDifferentProfile) {
+    // Prefix with the profile name (capitalized)
+    const spaceProfile = getSpaceProfile(label);
+    const profilePrefix = spaceProfile ? spaceProfile.charAt(0).toUpperCase() + spaceProfile.slice(1) : "Other";
+    // Extract the number from the label (e.g., work_10 -> 10)
+    const numMatch = label.match(/_(\d+)$/);
+    const num = numMatch ? parseInt(numMatch[1]) : name;
+    name = `${profilePrefix}-${num}`;
+  }
+
   const profileColor = getProfileColor(profileType);
 
   if (focused) {
@@ -114,13 +147,20 @@ const render = ({ output, displays, activeWorkspace, profileType }) => {
   // Filter to current display
   let filteredSpaces = output.filter(space => space.display == displayId);
 
-  // Filter by active workspace and profile type
+  // Filter by active workspace and profile type, but also include visible spaces from other profiles
   filteredSpaces = filteredSpaces.filter(space =>
-    isSpaceVisible(space.label, activeWorkspace, profileType)
+    isSpaceVisible(space.label, activeWorkspace, profileType) || space["is-visible"]
   );
 
-  // Sort spaces: workspace-specific (1-6) first, then profile-shared (7-10)
+  // Sort spaces: workspace-specific (1-6) first, then profile-shared (7-10), then other-profile spaces last
   filteredSpaces = filteredSpaces.sort((a, b) => {
+    const aFromDiff = isDifferentProfile(a.label, profileType);
+    const bFromDiff = isDifferentProfile(b.label, profileType);
+
+    // Different profile spaces go to the end
+    if (aFromDiff && !bFromDiff) return 1;
+    if (!aFromDiff && bFromDiff) return -1;
+
     const aNum = getDisplayNumber(a.label, activeWorkspace, profileType);
     const bNum = getDisplayNumber(b.label, activeWorkspace, profileType);
     if (typeof aNum === 'number' && typeof bNum === 'number') {

@@ -51,36 +51,38 @@ switch() {
         exit 1
     fi
 
-    # Get current space info
+    # Get current active workspace and its profile
     local current_active
     current_active=$(active)
-    local current_space
-    current_space=$(yabai -m query --spaces | jq -r '.[] | select(."has-focus") | .label')
-
-    # Get profile types for current and target workspaces
     local current_profile
     current_profile=$(profile "$current_active")
     local target_profile
     target_profile=$(profile "$name")
 
+    # Get currently focused space info
+    local current_space_info
+    current_space_info=$(yabai -m query --spaces | jq -r '.[] | select(."has-focus") | "\(.label)|\(.display)"')
+    local current_space="${current_space_info%|*}"
+    local current_display="${current_space_info#*|}"
+
     # Check if we're on a profile-shared space (7-10)
     local on_shared_space=false
-    local shared_space_num=""
-    if [[ "$current_space" =~ ^(work|personal)_0([7-9])$ ]]; then
+    if [[ "$current_space" =~ ^(work|personal)_0[7-9]$ ]] || [[ "$current_space" =~ ^(work|personal)_10$ ]]; then
         on_shared_space=true
-        shared_space_num="${current_space: -1}"
-    elif [[ "$current_space" =~ ^(work|personal)_10$ ]]; then
-        on_shared_space=true
-        shared_space_num="10"
     fi
 
-    # Save current space number for the current workspace (if on a workspace-specific space)
-    local current_space_num=""
-    local expected_prefix="${current_active}_0"
-    if [[ "$current_space" == ${expected_prefix}[1-6] ]]; then
-        current_space_num="${current_space: -1}"
-        # Save last space for current workspace
-        "$STATE_CMD" set "workspace.lastSpace.${current_active}" "$current_space_num"
+    # Save current space for current workspace on current display (if on a workspace-specific space)
+    if [[ "$current_space" =~ ^${current_active}_0[1-6]$ ]]; then
+        local current_space_num="${current_space: -1}"
+        # Get current lastSpace object for this workspace
+        local current_obj
+        current_obj=$("$STATE_CMD" get "workspace.lastSpace.${current_active}" 2>/dev/null)
+        if [[ -z "$current_obj" || "$current_obj" == "null" ]]; then
+            current_obj='{}'
+        fi
+        local new_obj
+        new_obj=$(echo "$current_obj" | jq --arg d "$current_display" --arg s "$current_space_num" '.[$d] = $s')
+        "$STATE_CMD" set "workspace.lastSpace.${current_active}" "$new_obj"
     fi
 
     # Update active workspace
@@ -92,60 +94,75 @@ switch() {
         return
     fi
 
-    # If on a shared space but switching to different profile, go to the target workspace's last space
-    if [[ "$on_shared_space" == true && "$current_profile" != "$target_profile" ]]; then
-        # Get last active space for target workspace (default to 1)
-        local target_space_num
-        target_space_num=$("$STATE_CMD" get "workspace.lastSpace.${name}" 2>/dev/null)
-        if [[ -z "$target_space_num" || "$target_space_num" == "null" ]]; then
-            target_space_num="1"
-        fi
+    # Get all displays
+    local displays
+    displays=$(yabai -m query --displays | jq -r '.[].index')
 
-        local target_space="${name}_0${target_space_num}"
-        # Check if target space exists, if so focus it
-        if yabai -m query --spaces | jq -e --arg label "$target_space" '.[] | select(.label == $label)' >/dev/null 2>&1; then
-            yabai -m space --focus "$target_space"
-        else
-            # Try to focus first available space in the new workspace
-            local first_space
-            first_space=$(yabai -m query --spaces | jq -r --arg prefix "${name}_" '[.[] | select(.label | startswith($prefix))] | sort_by(.label) | .[0].label // empty')
-            if [[ -n "$first_space" ]]; then
-                yabai -m space --focus "$first_space"
-            fi
-        fi
-        "$REFRESH_BAR"
-        return
+    # Get lastSpace object for target workspace
+    local last_space_obj
+    last_space_obj=$("$STATE_CMD" get "workspace.lastSpace.${name}" 2>/dev/null)
+    if [[ -z "$last_space_obj" || "$last_space_obj" == "null" ]]; then
+        last_space_obj='{}'
     fi
 
     # Check if target workspace has any spaces
     local target_spaces
-    target_spaces=$(yabai -m query --spaces | jq -r --arg prefix "${name}_" '[.[] | select(.label | startswith($prefix))] | length')
+    target_spaces=$(yabai -m query --spaces | jq -r --arg prefix "${name}_" '[.[] | select(.label | startswith($prefix) and test("_0[1-6]$"))] | length')
 
     if [[ "$target_spaces" -eq 0 ]]; then
         # No spaces exist for this workspace - create space 01
         "$YABAI_DIR/spaces/create.sh" "01" "$name"
-        yabai -m space --focus "${name}_01"
-    else
-        # Get last active space for target workspace (default to 1)
+    fi
+
+    # Focus appropriate space on each display (never move spaces between displays)
+    for display in $displays; do
+        # Get the last space for this workspace on this display
         local target_space_num
-        target_space_num=$("$STATE_CMD" get "workspace.lastSpace.${name}" 2>/dev/null)
+        target_space_num=$(echo "$last_space_obj" | jq -r --arg d "$display" '.[$d] // empty')
         if [[ -z "$target_space_num" || "$target_space_num" == "null" ]]; then
             target_space_num="1"
         fi
 
-        local target_space="${name}_0${target_space_num}"
-        # Check if target space exists, if so focus it
-        if yabai -m query --spaces | jq -e --arg label "$target_space" '.[] | select(.label == $label)' >/dev/null 2>&1; then
-            yabai -m space --focus "$target_space"
-        else
-            # Try to focus first available space in the new workspace
-            local first_space
-            first_space=$(yabai -m query --spaces | jq -r --arg prefix "${name}_" '[.[] | select(.label | startswith($prefix))] | sort_by(.label) | .[0].label // empty')
-            if [[ -n "$first_space" ]]; then
-                yabai -m space --focus "$first_space"
+        local target_label
+        # Check if it's a shared space (7-10) - use profile prefix instead of workspace
+        if [[ "$target_space_num" =~ ^(7|8|9|10)$ ]]; then
+            if [[ "$target_space_num" == "10" ]]; then
+                target_label="${target_profile}_10"
+            else
+                target_label="${target_profile}_0${target_space_num}"
             fi
+        else
+            target_label="${name}_0${target_space_num}"
         fi
-    fi
+
+        # Check if target space exists on this display
+        local space_on_display
+        space_on_display=$(yabai -m query --spaces | jq -r --arg label "$target_label" --argjson display "$display" \
+            '.[] | select(.label == $label and .display == $display) | .label')
+
+        if [[ -n "$space_on_display" ]]; then
+            # Space exists on this display, focus it
+            yabai -m space --focus "$target_label" 2>/dev/null || true
+        else
+            # Find any workspace-specific space for this workspace on this display
+            local any_space_on_display
+            any_space_on_display=$(yabai -m query --spaces | jq -r --arg prefix "${name}_0" --argjson display "$display" \
+                '[.[] | select(.label | startswith($prefix) and test("_0[1-6]$")) | select(.display == $display)] | sort_by(.label) | .[0].label // empty')
+
+            if [[ -n "$any_space_on_display" ]]; then
+                yabai -m space --focus "$any_space_on_display" 2>/dev/null || true
+            else
+                # Try to find a shared space for this profile on this display
+                local shared_space_on_display
+                shared_space_on_display=$(yabai -m query --spaces | jq -r --arg profile "$target_profile" --argjson display "$display" \
+                    '[.[] | select(.label | startswith($profile + "_")) | select(.label | test("_0[7-9]$|_10$")) | select(.display == $display)] | sort_by(.label) | .[0].label // empty')
+                if [[ -n "$shared_space_on_display" ]]; then
+                    yabai -m space --focus "$shared_space_on_display" 2>/dev/null || true
+                fi
+            fi
+            # If no space for this workspace/profile on this display, leave it as-is
+        fi
+    done
 
     # Notify bar to refresh
     "$REFRESH_BAR"
