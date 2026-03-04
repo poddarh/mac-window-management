@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# Move window to a space with workspace awareness
+# Move window to a space by number
 # Usage: move_window.sh <space_number>
-# For spaces 1-6: moves to {active_workspace}_0N
-# For spaces 7-10: moves to {profile}_0N where profile is work/personal
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 YABAI_DIR="$(dirname "$SCRIPT_DIR")"
-source "$YABAI_DIR/lib/config.sh"
 source "$YABAI_DIR/lib/get_space_label.sh"
 
 space_num=$1
@@ -17,7 +14,7 @@ if [[ -z "$space_num" ]]; then
     exit 1
 fi
 
-# Get the proper label for this space
+# Get the label for this space
 label=$(get_space_label "$space_num")
 
 # Ensure space exists

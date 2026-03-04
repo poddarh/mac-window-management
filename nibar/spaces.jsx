@@ -40,8 +40,6 @@ export const render = ({ output }) => {
       <Desktop
         output={data.spaces}
         displays={data.displays}
-        activeWorkspace={data.activeWorkspace || "default"}
-        profileType={data.profileType || "personal"}
       />
     </div>
   );

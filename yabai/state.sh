@@ -11,10 +11,6 @@ LOCK_FILE="$STATE_DIR/.state.lock"
 
 # Default state structure
 DEFAULT_STATE='{
-  "workspace": {
-    "active": "default",
-    "list": ["default"]
-  },
   "skhd": {
     "mode": "default"
   }
@@ -60,7 +56,7 @@ init() {
 
 # Get a value from state.json
 # Usage: state.sh get <path>
-# Example: state.sh get workspace.active
+# Example: state.sh get skhd.mode
 get() {
     local path="$1"
 
@@ -82,7 +78,7 @@ get() {
 
 # Set a value in state.json
 # Usage: state.sh set <path> <value>
-# Example: state.sh set workspace.active "personal"
+# Example: state.sh set skhd.mode "resize"
 set() {
     local path="$1"
     local value="$2"
@@ -130,8 +126,8 @@ case "$1" in
     *)
         echo "Usage: $0 {init|get|set} [args...]"
         echo "  init           - Initialize state file with defaults"
-        echo "  get <path>     - Get value (e.g., workspace.active)"
-        echo "  set <path> <v> - Set value (e.g., workspace.active personal)"
+        echo "  get <path>     - Get value (e.g., skhd.mode)"
+        echo "  set <path> <v> - Set value (e.g., skhd.mode resize)"
         exit 1
         ;;
 esac

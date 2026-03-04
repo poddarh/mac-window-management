@@ -120,7 +120,7 @@ shift + cmd + ctrl + alt - c : yabai -m space --create
 # Delete focused space and focus first space on display
 shift + cmd + ctrl + alt - d : yabai -m space --destroy
 
-# Delete all empty workspaces
+# Delete all empty spaces
 shift + cmd + ctrl + alt - x : ~/.yabai/spaces/close_empty.sh
 
 # Create space on the active display
@@ -128,7 +128,7 @@ cmd + ctrl + alt - n : yabai -m space --focus next
 # Create space on the active display
 cmd + ctrl + alt - p : yabai -m space --focus prev
 
-# Focus spaces (1-6 are workspace-specific, 7-10 are shared)
+# Focus spaces
 cmd + ctrl + alt - 1 : ~/.yabai/spaces/focus.sh 01
 cmd + ctrl + alt - 2 : ~/.yabai/spaces/focus.sh 02
 cmd + ctrl + alt - 3 : ~/.yabai/spaces/focus.sh 03
@@ -143,7 +143,7 @@ cmd + ctrl + alt - 0 : ~/.yabai/spaces/focus.sh 10
 # Set backtick the same as 0
 cmd + ctrl + alt - 0x32 : ~/.yabai/spaces/focus.sh 10
 
-# Move window to spaces (1-6 are workspace-specific, 7-10 are shared)
+# Move window to spaces
 shift + cmd + ctrl + alt - 1 : ~/.yabai/spaces/move_window.sh 01
 shift + cmd + ctrl + alt - 2 : ~/.yabai/spaces/move_window.sh 02
 shift + cmd + ctrl + alt - 3 : ~/.yabai/spaces/move_window.sh 03
@@ -226,14 +226,6 @@ resize   <  shift - down   : yabai -m window --resize bottom:0:20 ; yabai -m win
 resize   <  shift - left   : yabai -m window --resize left:-20:0 ; yabai -m window --resize right:-20:0
 resize   <  shift - right  : yabai -m window --resize right:20:0 ; yabai -m window --resize left:20:0
 
-# Workspace navigation
-cmd + ctrl + alt - w : ~/.yabai/workspaces/manager.sh cycle
-
-# Move window to another workspace (dialog)
-shift + cmd + ctrl + alt - w : ~/.yabai/workspaces/move_window_dialog.sh
-
-# Move space to another workspace (dialog)
-shift + cmd + ctrl + alt - m : ~/.yabai/workspaces/move_space_dialog.sh
 
 #######################
 #### Sample Config ####

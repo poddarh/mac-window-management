@@ -1,4 +1,4 @@
-import styles, { getProfileColor } from "./styles.jsx";
+import styles from "./styles.jsx";
 import * as Uebersicht from 'uebersicht'
 
 const containerStyle = {
@@ -7,16 +7,7 @@ const containerStyle = {
   gridGap: "8px"
 };
 
-const desktopStyle = {
-  // width: '4ch',
-};
-
-const workspaceLabelStyle = {
-  fontWeight: "700",
-  marginRight: "4px",
-  cursor: "pointer",
-  userSelect: "none"
-};
+const desktopStyle = {};
 
 // Note that this can change at any time
 const getCurrentDisplayId = (displays) => {
@@ -25,68 +16,11 @@ const getCurrentDisplayId = (displays) => {
   return display.index;
 }
 
-// Check if a space belongs to the active workspace or is a profile-shared space
-const isSpaceVisible = (label, activeWorkspace, profileType) => {
-  if (!label || label === "") {
-    // Unlabeled spaces are visible
-    return true;
-  }
+// Extract display number from space label (e.g., "space_03" -> 3)
+const getDisplayNumber = (label) => {
+  if (!label || label === "") return label;
 
-  // Profile-shared spaces (7-10): {profileType}_07 through {profileType}_10
-  const profilePattern = new RegExp(`^${profileType}_0[7-9]$`);
-  if (profilePattern.test(label) || label === `${profileType}_10`) {
-    return true;
-  }
-
-  // Workspace-specific spaces (activeWorkspace_01 through activeWorkspace_06)
-  const workspacePattern = new RegExp(`^${activeWorkspace}_0[1-6]$`);
-  if (workspacePattern.test(label)) {
-    return true;
-  }
-
-  return false;
-};
-
-// Check if a space belongs to a different profile
-const isDifferentProfile = (label, profileType) => {
-  if (!label || label === "") return false;
-
-  // Check if it's a space from the other profile
-  const otherProfile = profileType === "work" ? "personal" : "work";
-  const otherProfilePattern = new RegExp(`^${otherProfile}_`);
-  return otherProfilePattern.test(label);
-};
-
-// Get the profile from a space label
-const getSpaceProfile = (label) => {
-  if (!label) return null;
-  if (label.startsWith("work_")) return "work";
-  if (label.startsWith("personal_")) return "personal";
-  // For workspace-specific spaces, extract the workspace name
-  const match = label.match(/^([a-zA-Z][a-zA-Z0-9_]*)_0[1-6]$/);
-  if (match) return match[1];
-  return null;
-};
-
-// Get display number for a space label
-const getDisplayNumber = (label, activeWorkspace, profileType) => {
-  if (!label || label === "") {
-    return label;
-  }
-
-  // Profile-shared spaces: {profileType}_07 -> 7, {profileType}_10 -> 10
-  const profilePattern = new RegExp(`^${profileType}_0([7-9])$`);
-  const profileMatch = label.match(profilePattern);
-  if (profileMatch) {
-    return parseInt(profileMatch[1]);
-  }
-  if (label === `${profileType}_10`) {
-    return 10;
-  }
-
-  // Workspace-specific spaces: {workspace}_01 -> 1
-  const workspacePattern = new RegExp(`^${activeWorkspace}_0([1-6])$`);
-  const match = label.match(workspacePattern);
+  const match = label.match(/^space_0?(\d+)$/);
   if (match) {
     return parseInt(match[1]);
   }
@@ -94,33 +28,17 @@ const getDisplayNumber = (label, activeWorkspace, profileType) => {
   return label;
 };
 
-const renderSpace = (index, label, focused, visible, windows, activeWorkspace, profileType) => {
+const renderSpace = (index, label, focused, visible, windows) => {
   let contentStyle = JSON.parse(JSON.stringify(desktopStyle));
 
-  let hasWindows = windows.length > 0;
-
-  let name = getDisplayNumber(label, activeWorkspace, profileType);
+  let name = getDisplayNumber(label);
   if (name === label || name === "" || name === undefined) {
     // Fallback for unlabeled or unrecognized labels
     name = "i" + index;
   }
 
-  // Check if this space is from a different profile
-  const fromDifferentProfile = isDifferentProfile(label, profileType);
-  if (fromDifferentProfile) {
-    // Prefix with the profile name (capitalized)
-    const spaceProfile = getSpaceProfile(label);
-    const profilePrefix = spaceProfile ? spaceProfile.charAt(0).toUpperCase() + spaceProfile.slice(1) : "Other";
-    // Extract the number from the label (e.g., work_10 -> 10)
-    const numMatch = label.match(/_(\d+)$/);
-    const num = numMatch ? parseInt(numMatch[1]) : name;
-    name = `${profilePrefix}-${num}`;
-  }
-
-  const profileColor = getProfileColor(profileType);
-
   if (focused) {
-    contentStyle.color = profileColor;
+    contentStyle.color = styles.colors.accent;
     contentStyle.fontWeight = "700";
   } else if (visible) {
     contentStyle.color = styles.colors.fg;
@@ -140,29 +58,17 @@ const renderSpace = (index, label, focused, visible, windows, activeWorkspace, p
   );
 };
 
-const render = ({ output, displays, activeWorkspace, profileType }) => {
+const render = ({ output, displays }) => {
   if (typeof output === "undefined") return null;
   const displayId = getCurrentDisplayId(displays);
 
   // Filter to current display
   let filteredSpaces = output.filter(space => space.display == displayId);
 
-  // Filter by active workspace and profile type, but also include visible spaces from other profiles
-  filteredSpaces = filteredSpaces.filter(space =>
-    isSpaceVisible(space.label, activeWorkspace, profileType) || space["is-visible"]
-  );
-
-  // Sort spaces: workspace-specific (1-6) first, then profile-shared (7-10), then other-profile spaces last
+  // Sort by space number
   filteredSpaces = filteredSpaces.sort((a, b) => {
-    const aFromDiff = isDifferentProfile(a.label, profileType);
-    const bFromDiff = isDifferentProfile(b.label, profileType);
-
-    // Different profile spaces go to the end
-    if (aFromDiff && !bFromDiff) return 1;
-    if (!aFromDiff && bFromDiff) return -1;
-
-    const aNum = getDisplayNumber(a.label, activeWorkspace, profileType);
-    const bNum = getDisplayNumber(b.label, activeWorkspace, profileType);
+    const aNum = getDisplayNumber(a.label);
+    const bNum = getDisplayNumber(b.label);
     if (typeof aNum === 'number' && typeof bNum === 'number') {
       return aNum - bNum;
     }
@@ -190,23 +96,8 @@ const render = ({ output, displays, activeWorkspace, profileType }) => {
 
   const spaces = [];
 
-  // Add workspace label at the start (clickable to cycle workspaces)
-  const profileColor = getProfileColor(profileType);
-  spaces.push(
-    <div
-      key="workspace-label"
-      style={{...workspaceLabelStyle, color: profileColor}}
-      onClick={() => {
-        Uebersicht.run(`$HOME/.yabai/workspaces/manager.sh cycle`);
-      }}
-      title="Click to cycle workspaces"
-    >
-      {activeWorkspace}
-    </div>
-  );
-
   filteredSpaces.forEach(function (space) {
-    spaces.push(renderSpace(space.index, space.label, space["has-focus"], space["is-visible"], space.windows, activeWorkspace, profileType));
+    spaces.push(renderSpace(space.index, space.label, space["has-focus"], space["is-visible"], space.windows));
   });
 
   return (

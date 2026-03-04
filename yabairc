@@ -47,26 +47,24 @@ yabai -m rule --add app="^Cisco Secure Client$" manage=off
 yabai -m rule --add app="^zoom.us$" manage=on
 
 yabai -m signal --add event=display_changed \
-    action="~/.yabai/lib/refresh_bar.sh spaces workspace"
+    action="~/.yabai/lib/refresh_bar.sh spaces"
 
 # https://github.com/koekeishiya/yabai/issues/535
 yabai -m signal --add event=space_changed \
-    action="~/.yabai/lib/refresh_bar.sh spaces workspace"
-yabai -m signal --add event=space_changed \
-    action="~/.yabai/workspaces/sync.sh"
+    action="~/.yabai/lib/refresh_bar.sh spaces"
 
 # Refresh bar when window focus changes (e.g., clicking notifications)
 yabai -m signal --add event=window_focused \
-    action="~/.yabai/workspaces/sync.sh && ~/.yabai/lib/refresh_bar.sh spaces workspace status"
+    action="~/.yabai/lib/refresh_bar.sh spaces status"
 
 # Refresh bar when application switches (covers notification clicks)
 yabai -m signal --add event=application_front_switched \
-    action="~/.yabai/workspaces/sync.sh && ~/.yabai/lib/refresh_bar.sh spaces workspace"
+    action="~/.yabai/lib/refresh_bar.sh spaces"
 
 # Refresh bar when window is created or shown
 yabai -m signal --add event=window_created \
-    action="~/.yabai/lib/refresh_bar.sh spaces workspace"
+    action="~/.yabai/lib/refresh_bar.sh spaces"
 yabai -m signal --add event=window_deminimized \
-    action="~/.yabai/workspaces/sync.sh && ~/.yabai/lib/refresh_bar.sh spaces workspace"
+    action="~/.yabai/lib/refresh_bar.sh spaces"
 
 echo "yabai configuration loaded.."

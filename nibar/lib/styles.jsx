@@ -4,9 +4,7 @@ const colors = {
   bg: "#1c1c1c",
   red: "#ff8700",
   accent: "#5fafaf",
-  empty: "red",
-  work: "#87afff",      // Blue for work profile
-  personal: "#87d787"   // Green for personal profile
+  empty: "red"
 };
 
 const typography = {
@@ -14,11 +12,6 @@ const typography = {
   lineHeight: "24px",
   fontWeight: 500,
   fontFamily: "'SauceCodePro Nerd Font', monospace"
-};
-
-// Get profile color based on profile type
-export const getProfileColor = (profileType) => {
-  return profileType === "work" ? colors.work : colors.personal;
 };
 
 // Typography style mixin for container elements

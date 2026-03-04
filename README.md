@@ -1,35 +1,25 @@
 # Window Manager Setup
 
-A comprehensive macOS window management setup using yabai, skhd, and custom tooling for virtual workspaces with Chrome profile integration.
+A macOS window management setup using yabai, skhd, and custom tooling with a nibar status bar.
 
 ## Features
 
-- **Virtual Workspaces**: Multiple workspaces with 6 dedicated spaces each (spaces 1-6)
-- **Profile-Shared Spaces**: Spaces 7-10 are shared across workspaces of the same profile type (work/personal)
-- **Chrome Profile Routing**: URLs automatically open in the correct Chrome profile based on active workspace
-- **Nibar Status Bar**: Custom Übersicht widgets showing spaces, workspaces, and system status
+- **Labeled Spaces**: Up to 10 spaces (space_01 through space_10), auto-created on demand
+- **Nibar Status Bar**: Custom Übersicht widgets showing spaces and system status
 - **Keyboard-Driven**: Comprehensive hotkey system via skhd
+- **State Preservation**: Reload yabai without losing window positions
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Nibar Status Bar                        │
-├──────────────┬────────────────────────┬────────────────────────┤
-│  Spaces      │   Workspace Switcher   │   Status (time, etc)   │
-│  (left)      │   (center)             │   (right)              │
-└──────────────┴────────────────────────┴────────────────────────┘
+├──────────────────────────────────┬──────────────────────────────┤
+│  Spaces                          │   Status (time, etc)         │
+│  (left)                          │   (right)                    │
+└──────────────────────────────────┴──────────────────────────────┘
 
-Workspaces:
-  personal          work              testing
-  ├── personal_01   ├── work_01       ├── testing_01
-  ├── personal_02   ├── work_02       ├── testing_02
-  ├── ...           ├── ...           ├── ...
-  └── personal_06   └── work_06       └── testing_06
-
-Shared Spaces (by profile type):
-  work_07, work_08, work_09, work_10      (shared across all work workspaces)
-  personal_07, personal_08, personal_09   (shared across all personal workspaces)
+Spaces: space_01, space_02, ..., space_10
 ```
 
 ## Installation
@@ -51,8 +41,7 @@ This will:
 │   ├── lib/                # Shared utilities
 │   │   ├── config.sh       # Central configuration
 │   │   ├── get_space_label.sh
-│   │   ├── refresh_bar.sh
-│   │   └── select_workspace_dialog.sh
+│   │   └── refresh_bar.sh
 │   ├── spaces/             # Space operations
 │   │   ├── focus.sh        # Focus a space
 │   │   ├── move_window.sh  # Move window to space
@@ -60,14 +49,8 @@ This will:
 │   │   └── close_empty.sh  # Clean up empty spaces
 │   ├── stacks/             # Stack operations
 │   │   └── move.sh         # Move window in stack
-│   ├── workspaces/         # Workspace management
-│   │   ├── manager.sh      # Main workspace commands
-│   │   ├── sync.sh         # Sync workspace state
-│   │   ├── move_window_dialog.sh
-│   │   └── move_space_dialog.sh
 │   ├── state.sh            # State persistence
-│   ├── reload.sh           # Reload yabai with state preservation
-│   └── open_chrome.sh      # Open Chrome with correct profile
+│   └── reload.sh           # Reload yabai with state preservation
 ├── alfred-workflow/        # Alfred workflow source
 │   ├── info.plist          # Workflow definition
 │   └── icon.png            # Workflow icon
@@ -77,7 +60,6 @@ This will:
 │   │   ├── Desktop.jsx     # Space rendering
 │   │   └── ...
 │   ├── spaces.jsx          # Spaces widget
-│   ├── workspace.jsx       # Workspace switcher
 │   ├── status.jsx          # System status
 │   └── scripts/            # Data scripts
 ├── hammerspoon/            # Hammerspoon config
@@ -95,9 +77,7 @@ All shortcuts use the **Hyper key** (Caps Lock → Cmd+Ctrl+Alt via Karabiner).
 
 | Shortcut | Action |
 |----------|--------|
-| Hyper + 1-6 | Focus space 1-6 (workspace-specific) |
-| Hyper + 7-0 | Focus space 7-10 (profile-shared) |
-| Hyper + W | Cycle workspaces |
+| Hyper + 1-0 | Focus space 1-10 |
 | Hyper + ←/→/↑/↓ | Focus window in direction |
 | Hyper + N/P | Focus next/prev space |
 
@@ -105,10 +85,7 @@ All shortcuts use the **Hyper key** (Caps Lock → Cmd+Ctrl+Alt via Karabiner).
 
 | Shortcut | Action |
 |----------|--------|
-| Shift + Hyper + 1-6 | Move window to space 1-6 |
-| Shift + Hyper + 7-0 | Move window to space 7-10 |
-| Shift + Hyper + W | Move window to another workspace (dialog) |
-| Shift + Hyper + M | Move space to another workspace (dialog) |
+| Shift + Hyper + 1-0 | Move window to space 1-10 |
 | Shift + Hyper + ←/→/↑/↓ | Warp window in direction |
 | Hyper + F | Toggle fullscreen zoom |
 | Hyper + = | Balance window sizes |
@@ -130,35 +107,16 @@ All shortcuts use the **Hyper key** (Caps Lock → Cmd+Ctrl+Alt via Karabiner).
 | Shift + Hyper + Q | Close window |
 | Shift + Hyper + R | Reload yabai (preserves state) |
 
-## Workspace Profiles
-
-Workspaces can be either **work** or **personal** profile:
-- Determines which Chrome profile opens for URLs
-- Spaces 7-10 are shared within the same profile type
-- Profile colors: Blue (work), Green (personal)
-
-## Chrome Integration
-
-### Finicky (URL Routing)
-URLs clicked anywhere on the system open in the Chrome profile matching the active workspace's profile type.
-
-### Alfred Workflow
-Keyword `chrome` opens Chrome in the correct profile, focusing an existing window on the workspace if available.
-
 ## Configuration
 
 Edit `yabai/lib/config.sh` to customize:
-- Chrome profile directories
 - Widget IDs
 - State file paths
 
 ## State Management
 
-Workspace state is stored in `~/.yabai/state.json`:
-- Active workspace
-- Workspace list
-- Profile mappings
-- Last focused space per workspace
+State is stored in `~/.yabai/state.json`:
+- skhd mode (default/resize)
 
 ## Dependencies
 

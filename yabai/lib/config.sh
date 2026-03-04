@@ -15,30 +15,6 @@ YABAI_STATE_FILE="$YABAI_STATE_DIR/state.json"
 YABAI_TEMP_STATE="/tmp/yabai_state.json"
 
 # ============================================================
-# Chrome Configuration
-# ============================================================
-
-# Chrome profile directories (relative to ~/Library/Application Support/Google/Chrome/)
-# To find your profile directories, look in ~/Library/Application Support/Google/Chrome/
-# Each profile has a folder like "Default", "Profile 1", "Profile 2", etc.
-# You can also check chrome://version in each profile to see its directory name.
-CHROME_PROFILE_WORK="Default"
-CHROME_PROFILE_PERSONAL="Profile 10"
-
-# Map profile type to Chrome profile directory
-get_chrome_profile() {
-    local profile_type="$1"
-    case "$profile_type" in
-        work)
-            echo "$CHROME_PROFILE_WORK"
-            ;;
-        personal|*)
-            echo "$CHROME_PROFILE_PERSONAL"
-            ;;
-    esac
-}
-
-# ============================================================
 # Ubersicht / Nibar Configuration
 # ============================================================
 
@@ -46,20 +22,8 @@ UBERSICHT_APP_ID="tracesOf.Uebersicht"
 
 # Widget IDs
 NIBAR_WIDGET_SPACES="nibar-spaces-jsx"
-NIBAR_WIDGET_WORKSPACE="nibar-workspace-jsx"
 NIBAR_WIDGET_STATUS="nibar-status-jsx"
 NIBAR_WIDGET_BAR="nibar-bar-jsx"
-
-# ============================================================
-# Space Naming Configuration
-# ============================================================
-
-# Workspace-specific spaces: 01-06
-# Profile-shared spaces: 07-10
-
-# Regex patterns for space labels
-WORKSPACE_SPACE_PATTERN='_0[1-6]$'
-SHARED_SPACE_PATTERN='_0[7-9]$|_10$'
 
 # ============================================================
 # Homebrew Path

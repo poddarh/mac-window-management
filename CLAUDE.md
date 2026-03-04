@@ -7,18 +7,17 @@
 
 ## Yabai Management
 
-- **Always use `~/.yabai/reload.sh` to restart yabai.** This script saves and restores window state so windows, spaces, and workspaces are preserved across restarts.
-- Never use `yabai --restart-service` directly as it will lose window positions and workspace state.
+- **Always use `~/.yabai/reload.sh` to restart yabai.** This script saves and restores window state so windows, spaces, and positions are preserved across restarts.
+- Never use `yabai --restart-service` directly as it will lose window positions.
 
 ## Directory Structure
 
 ```
 yabai/
 ├── lib/                    # Shared utilities
-│   ├── config.sh           # Central config (Chrome profiles, widget IDs)
-│   ├── get_space_label.sh  # Get label for a space number
-│   ├── refresh_bar.sh      # Refresh nibar widgets
-│   └── select_workspace_dialog.sh
+│   ├── config.sh           # Central config (widget IDs, paths)
+│   ├── get_space_label.sh  # Get label for a space number (space_01, space_02, etc.)
+│   └── refresh_bar.sh      # Refresh nibar widgets
 ├── spaces/                 # Space operations
 │   ├── focus.sh            # Focus a space by number
 │   ├── move_window.sh      # Move window to space
@@ -26,32 +25,17 @@ yabai/
 │   └── close_empty.sh      # Clean up empty spaces
 ├── stacks/                 # Stack operations
 │   └── move.sh             # Navigate within stacks
-├── workspaces/             # Workspace management
-│   ├── manager.sh          # Main workspace commands (list, active, switch, create, delete, profile)
-│   ├── sync.sh             # Sync workspace state on space change
-│   ├── move_window_dialog.sh
-│   └── move_space_dialog.sh
 ├── state.sh                # State persistence (get/set for ~/.yabai/state.json)
-├── reload.sh               # Reload yabai with state preservation
-└── open_chrome.sh          # Open Chrome with correct profile for workspace
+└── reload.sh               # Reload yabai with state preservation
 ```
 
 ## Key Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `workspaces/manager.sh <cmd>` | Workspace CRUD: `list`, `active`, `switch <name>`, `create <name>`, `delete <name>`, `profile <name>` |
-| `state.sh get <path>` | Get value from state.json (e.g., `state.sh get workspace.active`) |
+| `state.sh get <path>` | Get value from state.json (e.g., `state.sh get skhd.mode`) |
 | `state.sh set <path> <value>` | Set value in state.json |
-| `open_chrome.sh [url]` | Open Chrome in correct profile, reuse window if on workspace |
-| `lib/refresh_bar.sh <widgets...>` | Refresh nibar widgets (spaces, workspace, status) |
-
-## Chrome Integration
-
-- **Profile types**: `work` or `personal`, configured per workspace in state.json
-- **Profile directories**: Set in `lib/config.sh` (`CHROME_PROFILE_WORK`, `CHROME_PROFILE_PERSONAL`)
-- **Window detection**: Filters by `role == "AXWindow"` to exclude tooltips/helpers
-- **Behavior**: Reuses existing Chrome window on workspace, creates new one if none exists
+| `lib/refresh_bar.sh <widgets...>` | Refresh nibar widgets (spaces, status) |
 
 ## Übersicht/Nibar Notes
 
@@ -71,15 +55,6 @@ yabai -m query --spaces | jq '.[] | {index, label}'
 
 # Query all windows with details
 yabai -m query --windows | jq '.[] | {id, app, space, title: .title[0:50], role}'
-
-# Find Chrome windows (real windows only)
-yabai -m query --windows | jq '.[] | select(.app == "Google Chrome" and .role == "AXWindow")'
-
-# Get current workspace
-~/.yabai/workspaces/manager.sh active
-
-# Get workspace profile type
-~/.yabai/workspaces/manager.sh profile <workspace_name>
 ```
 
 ## Testing Changes
