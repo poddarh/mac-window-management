@@ -51,9 +51,6 @@ This will:
 │   │   └── move.sh         # Move window in stack
 │   ├── state.sh            # State persistence
 │   └── reload.sh           # Reload yabai with state preservation
-├── alfred-workflow/        # Alfred workflow source
-│   ├── info.plist          # Workflow definition
-│   └── icon.png            # Workflow icon
 ├── nibar/                  # Übersicht widgets
 │   ├── lib/                # Shared components
 │   │   ├── styles.jsx      # Theme and utilities
@@ -65,8 +62,7 @@ This will:
 ├── hammerspoon/            # Hammerspoon config
 ├── karabiner/              # Karabiner rules
 ├── skhdrc                  # Hotkey definitions
-├── yabairc                 # Yabai config
-└── finicky.js              # URL routing
+└── yabairc                 # Yabai config
 ```
 
 ## Keyboard Shortcuts
@@ -125,7 +121,6 @@ State is stored in `~/.yabai/state.json`:
 - [Übersicht](http://tracesof.net/uebersicht/) - Desktop widgets
 - [Hammerspoon](https://www.hammerspoon.org/) - Automation (for Stackline)
 - [Karabiner-Elements](https://karabiner-elements.pqrs.org/) - Keyboard customization
-- [Finicky](https://github.com/johnste/finicky) - URL routing
 - [jq](https://stedolan.github.io/jq/) - JSON processing
 
 ## WiFi SSID Display (macOS Sonoma+)

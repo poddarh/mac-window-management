@@ -113,34 +113,6 @@ fi
 ln -s "$SCRIPT_DIR/nibar" "$UBERSICHT_WIDGETS/nibar"
 echo "✓ Linked Übersicht nibar widget"
 
-# Build and install Alfred workflow
-echo ""
-echo "=== Building Alfred Workflow ==="
-WORKFLOW_DIR="$SCRIPT_DIR/alfred-workflow"
-WORKFLOW_OUTPUT="$SCRIPT_DIR/Chrome-Workspace.alfredworkflow"
-
-if [ -d "$WORKFLOW_DIR" ]; then
-    # Remove old workflow if exists
-    rm -f "$WORKFLOW_OUTPUT"
-
-    # Create .alfredworkflow (which is just a zip file)
-    (cd "$WORKFLOW_DIR" && zip -r "$WORKFLOW_OUTPUT" . -x ".*")
-    echo "✓ Built $WORKFLOW_OUTPUT"
-
-    # Install to Alfred if Alfred is installed
-    ALFRED_WORKFLOWS="$HOME/Library/Application Support/Alfred/Alfred.alfredpreferences/workflows"
-    if [ -d "$ALFRED_WORKFLOWS" ]; then
-        echo "Installing Alfred workflow..."
-        open "$WORKFLOW_OUTPUT"
-        echo "✓ Alfred workflow opened for import"
-    else
-        echo "Alfred not found. Workflow built at: $WORKFLOW_OUTPUT"
-        echo "  Double-click to install when Alfred is available"
-    fi
-else
-    echo "⚠ Alfred workflow source not found at $WORKFLOW_DIR"
-fi
-
 # Add Karabiner Caps Lock hyper key rule
 echo ""
 echo "=== Configuring Karabiner-Elements ==="
