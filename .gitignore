@@ -5,5 +5,8 @@
 .DS_Store
 yabai/state.json
 
+# Watchman
+.watchman-cookie-*
+
 # Alfred workflow binary (built from alfred-workflow/ source)
 *.alfredworkflow
