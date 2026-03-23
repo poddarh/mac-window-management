@@ -1,6 +1,6 @@
 [submodule "stackline"]
 	path = stackline
-	url = https://github.com/poddarh/stackline.git
+	url = git@github.com:poddarh/stackline.git
 [submodule "mic-auto-switch"]
 	path = mic-auto-switch
 	url = git@github.com:poddarh/mic-auto-switch.git
