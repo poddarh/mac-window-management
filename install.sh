@@ -13,6 +13,7 @@ echo "  - Übersicht (desktop widgets)"
 echo "  - Stackline (window stack indicators)"
 echo "  - Nibar (status bar widget)"
 echo "  - Karabiner-Elements (keyboard customization)"
+echo "  - Mic Auto-Switch (automatic microphone switching)"
 echo ""
 
 # Check for Homebrew
@@ -131,6 +132,11 @@ skhd --start-service || echo "skhd service may already be running"
 # Apply macOS defaults (Dock, Desktop, etc.)
 "$SCRIPT_DIR/macos/defaults.sh"
 
+# Install mic-auto-switch
+echo ""
+echo "=== Setting up Mic Auto-Switch ==="
+"$SCRIPT_DIR/mic-auto-switch/install.sh"
+
 echo ""
 echo "=== Setup complete! ==="
 echo ""
@@ -147,6 +153,8 @@ echo "   - Create new shortcut named 'GetWiFiSSID'"
 echo "   - Add action: 'Get Current Wi-Fi'"
 echo "   - Add action: 'Stop and Output' (output the Wi-Fi name)"
 echo "   - Test with: shortcuts run 'GetWiFiSSID'"
+echo "7. Add preferred microphones for auto-switch:"
+echo "   ~/.local/scripts/add-preferred-mic.sh"
 echo ""
 echo "To restart services:"
 echo "  yabai --restart-service"
