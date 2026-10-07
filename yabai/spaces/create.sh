@@ -12,6 +12,12 @@ die() {
     exit 1
 }
 
+# Fail where the user can actually see it - hotkeys have no terminal
+fail() {
+    "$YABAI_DIR/lib/notify.sh" "yabai: could not create $label" "$1"
+    exit 1
+}
+
 # Validate arguments
 [ "$#" -ge 1 ] || die "At least 1 argument required, $# provided"
 echo "$1" | grep -E -q '^(0[1-9]|10)$' || die "Numeric argument required in the range [01, 10], $1 provided"
@@ -27,11 +33,32 @@ fi
 # Get the current display
 current_display="$(yabai -m query --spaces | jq 'map(select(."has-focus"))[0].display')"
 
-# Create a new space (creates on the currently focused display)
-yabai -m space --create
+# Snapshot existing space ids so the new space can be identified positively
+before_ids="$(yabai -m query --spaces --display "$current_display" | jq -c 'map(.id)')"
 
-# Get the index for the newly created space (it's the last space on this display)
-new_index="$(yabai -m query --spaces --display "$current_display" | jq '.[-1].index')"
+# Create a new space (creates on the currently focused display)
+create_output="$(yabai -m space --create 2>&1)" || fail "${create_output:-yabai -m space --create failed}"
+
+# The scripting addition creates the space asynchronously, so wait for it to
+# show up. yabai reports success even when the scripting addition silently does
+# nothing (e.g. it could not locate Dock's addSpace function after a macOS
+# update), so treat a space that never appears as a hard failure - relabelling
+# whatever space happens to be last would steal the label off an existing space.
+new_id=""
+for _ in $(seq 1 20); do
+    new_id="$(yabai -m query --spaces --display "$current_display" | jq -r --argjson before "$before_ids" '
+      map(select(.id as $id | $before | index($id) | not)) | .[-1].id // empty
+    ')"
+    if [[ -n "$new_id" ]]; then
+        break
+    fi
+    sleep 0.1
+done
+
+[[ -n "$new_id" ]] || fail "yabai reported success but no space appeared. Check that the scripting addition is loaded: sudo yabai --load-sa"
+
+# Get the index for the newly created space
+new_index="$(yabai -m query --spaces --display "$current_display" | jq --argjson id "$new_id" 'map(select(.id == $id))[0].index')"
 
 # Get the index at which the new space should be inserted (sorted by label)
 insertion_index="$(yabai -m query --spaces --display "$current_display" | jq --arg label "$label" --argjson fallback "$new_index" '
@@ -41,9 +68,9 @@ insertion_index="$(yabai -m query --spaces --display "$current_display" | jq --a
 ')"
 
 # Label the new space
-yabai -m space "$new_index" --label "$label"
+label_output="$(yabai -m space "$new_index" --label "$label" 2>&1)" || fail "${label_output:-could not label space $new_index}"
 
 # Move the new space to the right location if needed
 if [[ "$new_index" != "$insertion_index" ]]; then
-    yabai -m space "$label" --move "$insertion_index"
+    move_output="$(yabai -m space "$label" --move "$insertion_index" 2>&1)" || fail "${move_output:-could not move $label to index $insertion_index}"
 fi

@@ -17,8 +17,8 @@ fi
 # Get the label for this space
 label=$(get_space_label "$space_num")
 
-# Ensure space exists
-"$SCRIPT_DIR/create.sh" "$space_num"
+# Ensure space exists (create.sh reports its own failures)
+"$SCRIPT_DIR/create.sh" "$space_num" || exit 1
 
 # Move window to the space
 yabai -m window --space "$label"
