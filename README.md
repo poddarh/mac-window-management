@@ -116,8 +116,8 @@ State is stored in `~/.yabai/state.json`:
 
 ## Dependencies
 
-- [yabai](https://github.com/koekeishiya/yabai) - Tiling window manager
-- [skhd](https://github.com/koekeishiya/skhd) - Hotkey daemon
+- [yabai](https://github.com/asmvik/yabai) - Tiling window manager
+- [skhd](https://github.com/asmvik/skhd) - Hotkey daemon
 - [Übersicht](http://tracesof.net/uebersicht/) - Desktop widgets
 - [Hammerspoon](https://www.hammerspoon.org/) - Automation (for Stackline)
 - [Karabiner-Elements](https://karabiner-elements.pqrs.org/) - Keyboard customization

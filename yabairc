@@ -49,7 +49,7 @@ yabai -m rule --add app="^zoom.us$" manage=on
 yabai -m signal --add event=display_changed \
     action="~/.yabai/lib/refresh_bar.sh spaces"
 
-# https://github.com/koekeishiya/yabai/issues/535
+# https://github.com/asmvik/yabai/issues/535
 yabai -m signal --add event=space_changed \
     action="~/.yabai/lib/refresh_bar.sh spaces"
 
